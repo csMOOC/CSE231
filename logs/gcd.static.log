@@ -1,0 +1,11 @@
+Printing analysis 'count static instruction pass':
+alloca              3
+br                  3
+call                3
+icmp                1
+load                5
+phi                 1
+ret                 2
+store               3
+urem                1
+TOTAL               22

@@ -1,0 +1,19 @@
+*********************************************
+FAIL: Output DOES NOT match the golden output
+*********************************************
+add                 3199
+alloca              18
+ashr                8
+br                  3176
+call                135
+getelementptr       2306
+icmp                1105
+load                12834
+ret                 2
+sext                256
+shl                 128
+store               4055
+sub                 448
+trunc               2056
+zext                8155
+TOTAL               37881

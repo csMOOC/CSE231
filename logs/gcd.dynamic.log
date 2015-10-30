@@ -1,0 +1,11 @@
+8
+alloca              7
+br                  6
+call                4
+icmp                3
+load                10
+phi                 3
+ret                 4
+store               7
+urem                2
+TOTAL               46

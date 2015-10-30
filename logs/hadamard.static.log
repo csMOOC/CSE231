@@ -1,0 +1,17 @@
+Printing analysis 'count static instruction pass':
+add                 10
+alloca              18
+ashr                2
+br                  27
+call                11
+getelementptr       10
+icmp                7
+load                55
+ret                 2
+sext                2
+shl                 2
+store               28
+sub                 1
+trunc               9
+zext                28
+TOTAL               212

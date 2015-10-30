@@ -1,0 +1,6 @@
+Printing analysis 'count static instruction pass':
+alloca              1
+call                1
+ret                 1
+store               1
+TOTAL               4

@@ -1,0 +1,10 @@
+!llvm/src/lib/CSE231/
+
+llvm/src
+llvm/build
+
+*.gz
+package.sh
+startenv.sh
+VERSION
+Makefile

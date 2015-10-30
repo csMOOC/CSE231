@@ -1,0 +1,30 @@
+miniz.c version: 9.1.15
+Compressed from 490 to 81 bytes
+Decompressed from 81 to 490 bytes
+Success.
+Function                                          Bias      Taken     Total     
+main                                              0.222222  2         9         
+mz_adler32                                        0.955882  65        68        
+mz_compress2                                      0.000000  0         3         
+mz_deflate                                        0.500000  5         10        
+mz_deflateBound                                   1.000000  1         1         
+mz_deflateEnd                                     1.000000  2         2         
+mz_deflateInit2                                   0.222222  2         9         
+mz_inflate                                        0.538462  7         13        
+mz_inflateEnd                                     1.000000  2         2         
+mz_inflateInit2                                   0.400000  2         5         
+mz_uncompress                                     0.000000  0         3         
+tdefl_calculate_minimum_redundancy                0.650246  264       406       
+tdefl_compress                                    0.541667  13        24        
+tdefl_compress_block                              0.000000  0         1         
+tdefl_compress_lz_codes                           0.704082  207       294       
+tdefl_compress_normal                             0.611734  2127      3477      
+tdefl_create_comp_flags_from_zip_params           0.285714  2         7         
+tdefl_flush_block                                 0.666667  38        57        
+tdefl_flush_output_buffer                         0.750000  3         4         
+tdefl_huffman_enforce_max_code_size               0.888889  96        108       
+tdefl_init                                        0.000000  0         1         
+tdefl_optimize_huffman_table                      0.756056  1342      1775      
+tdefl_radix_sort_syms                             0.979381  855       873       
+tdefl_start_dynamic_block                         0.409742  715       1745      
+tinfl_decompress                                  0.863445  4521      5236      

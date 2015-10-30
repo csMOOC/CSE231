@@ -1,0 +1,14 @@
+CPPFLAGS = `llvm-config --cppflags`
+
+all: $(OBJ)
+
+$(OBJ): %.bc: %.cpp
+
+%.bc: %.cpp
+	clang $(CPPFLAGS) -O0 -emit-llvm -c $< -o $@
+	llvm-dis $@
+
+.PHONY: clean
+clean:
+	rm -f *.bc *.ll *.o *.exe
+
