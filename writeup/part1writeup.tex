@@ -1,0 +1,126 @@
+\documentclass[12pt]{article}
+
+\usepackage[letterpaper, portrait, margin=1in]{geometry}
+
+\begin{document}
+
+\title{CSE 231 Project Report: LLVM Project}
+\author{Zhenchao Gan, Tao Li, Antonella Wilby}
+\date{November 3, 2015}
+\maketitle
+
+\section*{Overview}
+
+In this project, we implemented LLVM passes for collecting static instruction counts, dynamic instruction counts, and profiling branch biases. Each LLVM pass takes in a program in its Intermediate Representation (IR) and uses that information to profile the program. In section one, we describe a pass that counts the number of instructions in the IR, which is the static instruction count (IC). In section two, we describe a pass that counts the number of instructions executed at runtime, or the dynamic IC. In section three, we describe a pass that analyzes the branch bias for each function in a program, i.e. the taken/not-taken ratio of the branch instructions in the program. We used each pass to profile four benchmarks: {\tt welcome.cpp}, {\tt compression.c}, {\tt gcd.cpp}, and {\tt hadamard\_test.c}.
+
+\section{Collecting Static Instruction Counts}
+
+We implemented an LLVM pass that takes in the Intermediate Representation of a program, and counts the number of occurrences of each separate instruction, then prints the results after the program has been analyzed.
+
+\subsection{Algorithm and Implementation}
+
+We defined our pass {\tt csi} as a struct inheriting from {\tt ModulePass}. We first create a C++ map to store the instructions encountered while profiling the program and the associated instruction counts. The algorithm first iterates through a given Module (e.g., {\tt hadamard.bc}). Within the Module, the algorithm iterates through every function, and within the function the algorithm iterates through each basic block. As it iterates through the basic block, the algorithm gets instructions using the function {\tt Instruction::getOpcodeName()} and increments the associated counter within the map for each instruction in the basic block. After the entire IR has been analyzed, the algorithm prints the contents of the map to {\tt stdout}.
+
+\subsection{Benchmark}
+
+\begin{figure*}[!t]
+\begin{center}
+\begin{tabular} { |c|c| }
+\hline
+	add & 526 \\
+	br & 3143 \\
+	call & 473 \\
+	getelementptr & 2806 \\
+	load & 6989 \\
+	mul & 37 \\
+	store & 3044 \\
+	sub & 272 \\
+	TOTAL & 22167 \\
+\hline
+\end{tabular}
+\caption{Selected static instruction counts from the {\tt compression} benchmark}
+\label{STATIC}
+\end{center}
+\end{figure*}
+
+We discuss the results of our {\tt csi} pass on the {\tt compression} benchmark. Figure \ref{STATIC} shows static instruction counts for a select set of common instructions, with some lesser-used instructions omitted for brevity. Please refer to the logs for complete statistics.
+\\\\
+The total static instruction count for the program is 22167 instructions. As would be expected, the most common instructions include {\tt br} instructions, {\tt load} instructions, and {\tt store} instructions. 
+
+
+\section{Collecting Dynamic Instruction Counts}
+
+\subsection{Algorithm and Implementation}
+
+As in our first pass, we defined our pass {\tt cdi} as a struct inheriting from {\tt ModulePass}. 
+
+\subsection{Benchmark}
+
+\begin{figure*}[!t]
+\begin{center}
+\begin{tabular} { |c|c| }
+\hline
+	add & 14606 \\
+	br & 28848 \\
+	call & 140 \\
+	getelementptr & 33676 \\
+	load & 86528 \\
+	mul & 29 \\
+	store & 29634 \\
+	sub & 1780 \\
+	TOTAL & 241847 \\
+\hline
+\end{tabular}
+\caption{Selected dynamic instruction counts from the {\tt compression} benchmark}
+\label{DYNAMIC}
+\end{center}
+\end{figure*}
+
+We discuss the results of our {\tt cdi} pass on the {\tt compression} benchmark. Figure \ref{DYNAMIC} shows dynamic instruction counts for the same set of common instructions as in Section 1, with lesser-used instructions omitted. The total dynamic instruction count for the program is 241847 executed instructions. 
+
+\section{Profiling Branch Bias}
+
+\subsection{Algorithm and Implementation}
+
+\subsection{Benchmark}
+
+We discuss the results of our {\tt pbb} pass on the {\tt compression} benchmark. 
+
+\begin{figure*}[!t]
+\begin{center}
+\begin{tabular} { |c|c|c|c| }
+\hline
+	Function & Bias & Taken & Total \\
+	main & 0.222222 & 2  & 9 \\
+	mz\_adler32 & 0.955882 &  65  & 68 \\
+	mz\_compress2 & 0.000000  & 0 & 3 \\
+	mz\_deflate & 0.500000  & 5 & 10 \\ 
+	mz\_deflateBound & 1.000000 & 1 & 1\\
+	mz\_deflateEnd & 1.000000 & 2  &  2 \\
+	mz\_deflateInit2  & 0.222222 & 2  & 9 \\
+	mz\_inflate & 0.538462 & 7 &13 \\
+	mz\_inflateEnd & 1.000000 & 2 & 2 \\
+	mz\_inflateInit2 & 0.400000 & 2 & 5 \\
+	mz\_uncompress & 0.000000 & 0 & 3 \\
+	tdefl\_calculate\_minimum\_redundancy & 0.650246 & 264 & 406 \\
+	tdefl\_compress  & 0.541667 & 13  & 24 \\
+	tdefl\_compress\_block & 0.000000 & 0  & 1 \\
+	tdefl\_compress\_lz\_codes & 0.704082 & 207& 294 \\
+	tdefl\_compress\_normal & 0.611734 & 2127 & 3477 \\
+	tdefl\_create\_comp\_flags\_from\_zip\_params & 0.285714 & 2 & 7 \\
+	tdefl\_flush\_block & 0.666667 & 38 & 57 \\
+	tdefl\_flush\_output\_buffer & 0.750000 & 3 & 4 \\
+	tdefl\_huffman\_enforce\_max\_code\_size & 0.888889 & 96 &108 \\
+	tdefl\_init & 0.000000 & 0 & 1 \\
+	tdefl\_optimize\_huffman\_table & 0.756056 & 1342 & 1775 \\
+	tdefl\_radix\_sort\_syms  & 0.979381 & 855  & 873 \\
+	tdefl\_start\_dynamic\_block &  0.409742 & 715 &  1745 \\
+	tinfl\_decompress  & 0.863445 & 4521 & 5236 \\
+\hline
+\end{tabular}
+\caption{Branch biases from the {\tt compression} benchmark}
+\label{BRANCH}
+\end{center}
+\end{figure*}
+
+\end{document}
