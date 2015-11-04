@@ -8,3 +8,5 @@ package.sh
 startenv.sh
 VERSION
 Makefile
+
+.DS_Store
