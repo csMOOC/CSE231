@@ -43,14 +43,14 @@ We defined our pass {\tt csi} as a struct inheriting from {\tt ModulePass}. We f
 \end{center}
 \end{figure*}
 
-We discuss the results of our {\tt csi} pass on the {\tt compression} benchmark. Figure \ref{STATIC} shows static instruction counts for a select set of common instructions, with some lesser-used instructions omitted for brevity. Please refer to the logs for complete statistics.
+We discuss the results of our {\tt csi} pass on the {\tt compression} benchmark. Figure 1 shows static instruction counts for a select set of common instructions, with some lesser-used instructions omitted for brevity. Please refer to the logs for complete statistics.
 \\\\
 The total static instruction count for the program is 22167 instructions. As would be expected, the most common instructions include {\tt br} instructions, {\tt load} instructions, and {\tt store} instructions. 
 
 
 \section{Collecting Dynamic Instruction Counts}
 
-We implemented an LLVM pass for computing the dynamic instruction count of a program, or the number of executed instructions. Our pass instruments the program by inserting a call during execution to a function in our instrumentation module that counts the number of times each instruction executes. 
+We implemented an LLVM pass called {\tt cdi} for computing the dynamic instruction count of a program, or the number of executed instructions. Our pass instruments the program by inserting a call during execution to a function in our instrumentation module that counts the number of times each instruction executes. 
 
 \subsection{Algorithm and Implementation}
 
@@ -59,7 +59,6 @@ The instrumentation module contains a map for collecting instruction counts, a f
 As in our first pass, this pass iterates through each module, function, and basic block in the program. For each basic block, the program creates a C++ map to store the instructions executed during execution of that block. If the program encounters any of the opcodes {\tt jump}, {\tt ret}, or {\tt br}, it means the end of the basic block has been reached, so we insert a call to our instrumentation module. We use the function {\tt Module::getOrInsertFunction()} and a call to {\tt IRBuilder::CreateCall()}  to insert a call to the instrumentation module's {\tt collectRuntimeInfo()} function in order to add the instruction counts gathered during this basic block to the overall instruction counter map.    In the pass, we call this instrumentation module function with the mangled function name {\tt \_Z18collectRuntimeInfoPci}. 
 \\\\
 After the entire program has executed, we use these same functions to insert a call to the {\tt dumpInfo()} function in the instrumentation module. To determine if it is the main function that is executing, we to see if the instruction is a {\tt return} function and if its parent function name is {\tt main}. If so, we use the {\tt Module::getOrInsertFunction()} and {\tt IRBuilder::CreateCall()} functions to insert a call to our {\tt dumpInfo()} function using the mangled function name {\tt \_Z8dumpInfov}. 
-
 
 \subsection{Benchmark}
 
@@ -83,15 +82,24 @@ After the entire program has executed, we use these same functions to insert a c
 \end{center}
 \end{figure*}
 
-We discuss the results of our {\tt cdi} pass on the {\tt compression} benchmark. Figure \ref{DYNAMIC} shows dynamic instruction counts for the same set of common instructions as in Section 1, with lesser-used instructions omitted. The total dynamic instruction count for the program is 241847 executed instructions. As expected, {\tt branch}, {\tt load}, and {\tt store} instructions continue to make up the majority of executed instructions, but the {\tt add} and {\tt getelementptr} instructions are also executed very frequently. The number of {\tt call} and {\tt mul} instructions decreased, suggesting that there are branches in the program which are never taken. 
+We discuss the results of our {\tt cdi} pass on the {\tt compression} benchmark. Figure 2 shows dynamic instruction counts for the same set of common instructions as in Section 1, with lesser-used instructions omitted. The total dynamic instruction count for the program is 241847 executed instructions. As expected, {\tt branch}, {\tt load}, and {\tt store} instructions continue to make up the majority of executed instructions, but the {\tt add} and {\tt getelementptr} instructions are also executed very frequently. The number of {\tt call} and {\tt mul} instructions decreased, suggesting that there are branches in the program which are never taken. 
 
 \section{Profiling Branch Bias}
 
+We created an LLVM pass called {\tt pbb} and an instrumentation module which counts the number of taken and not-taken branches and computes their ratio during runtime.
+
 \subsection{Algorithm and Implementation}
+
+As with the dynamic instruction count pass, we created an instrumentation module with a function for collecting branch taken/not-taken statistics, a function for printing the statistics to the screen after finishing execution, and two maps, one for storing the number of times a branch was taken ({\tt Truemap}), the other for storing the total number of times a branch comparison was evaluated ({\tt Totalmap}). The statistics function, called {\tt collectBranchInfo()}, takes in a branch function name and a boolean value indicating whether or not the branch was taken ({\tt true} for taken, {\tt false} otherwise). It increments the counter for that branch in {\tt Totalmap}, and if the boolean evaluates to {\tt true} also increments the counter in {\tt Truemap}. The statistics printing function, called {\tt dumpInfo()}, is called just before the pass exits and computes the taken/not-taken ratio based on the values of the counters in the two maps, then prints this information to {\tt stdout} in table form.
+\\\\
+As in the first two passes, the algorithm iterates through the modules, functions, and basic blocks. In each basic block it checks each instruction to see if the instruction is a {\tt branch}. If so, it first gets the name of the branch using the {\tt IRBuilder::CreateGlobalStringPtr()} function and the name of the instruction's parent's parent function. Then, it creates a vector for storing the operands to the {\tt collectBranchInfo()} function, with the first operand the branch name string pointer just created, and the second operand the boolean result of the branch comparison (accessed by getting the instruction's first operand using the {\tt getOperand()} function). Then, the pass inserts a call to our instrumentation module using the mangled function name {\tt \_Z17collectBranchInfoPcb} in the same manner as in the dynamic instruction count pass, using the {\tt Module::getOrInsertFunction()} and {IRBuilder::CreateCall()} functions.
+\\\\
+This pass inserts a call to {\tt dumpInfo} in the same way as in the dynamic instruction count pass, using the mangled name {\tt \_Z8dumpInfov}.
+
 
 \subsection{Benchmark}
 
-We discuss the results of our {\tt pbb} pass on the {\tt compression} benchmark. 
+Figure 3 shows the results of our {\tt pbb} pass on the {\tt compression} benchmark. Of the 25 functions, 16 of them are taken more times than they are not taken (i.e., a taken/total ratio of over 0.5). Additionally, of the eight branches that are taken over 100 times, all but one are taken more than they are not-taken, and many of these are taken over 75\% of the time. This suggests that interesting optimizations can be made in the area of branch prediction using this information.
 
 \begin{figure*}[!t]
 \begin{center}
