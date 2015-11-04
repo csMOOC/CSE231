@@ -1,7 +1,5 @@
+llvm/*
 !llvm/src/lib/CSE231/
-
-llvm/src
-llvm/build
 
 *.gz
 package.sh

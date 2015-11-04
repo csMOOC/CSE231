@@ -25,7 +25,7 @@ g++ temp.o $LLVMLIBS $LDFLAGS -o run.exe
 
 ./run.exe
 
-
+#rm *.bc
 rm *.bc
 rm *.o
 rm *.exe
