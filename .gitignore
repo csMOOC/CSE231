@@ -1,4 +1,3 @@
-llvm/*
 !llvm/src/lib/CSE231/
 
 *.gz
