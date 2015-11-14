@@ -1,11 +1,11 @@
-#include "lattices/AELatticeNode.h"
+#include "../../include/lattice/AELatticeNode.h"
 
 LatticeNode* AELatticeNode::join(LatticeNode *in) {
 	
-	if(in->getIsBottom()) return this;
-	if(this.isbottom) return in;
+	if(in->isbottom) return this;
+	if(this->isbottom) return in;
 
-	AELatticeNode *AEin = dyn_cast<AELatticeNode*>(in);
+	AELatticeNode *AEin = dyn_cast<AELatticeNode>(in);
 	map<Value*, Instruction*> joinnode;
 	map<Value*, Instruction*> node1 = this->node;
 	map<Value*, Instruction*> node2 = AEin->node;
@@ -21,16 +21,16 @@ LatticeNode* AELatticeNode::join(LatticeNode *in) {
 }
 
 void AELatticeNode::PrintInfo() {
-	errs() << "			Debug Info for AE Lattice Point" << endl;
-	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << endl;
+	errs() << "			Debug Info for AE Lattice Point" << "\n";
+	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << "\n";
 	for(map<Value*, Instruction*>::iterator it = node.begin(); it != node.end(); it++) {
-		Valut* v = it->first;
+		Value* v = it->first;
 		Instruction* i = it->second;
 		v->print(errs());
-		errs() << val;
+		errs() << v;
 		errs() << "----->";
 		i->print(errs());
 		errs() << i;
-		errs() << endl;
+		errs() << "\n";
 	}
 }

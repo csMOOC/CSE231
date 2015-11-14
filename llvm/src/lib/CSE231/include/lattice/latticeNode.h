@@ -15,8 +15,6 @@ public:
 	*/
 	enum latticeKind{CP, AE, RA, IPA};
 
-private:
-
 	bool isbottom;
 	bool istop;
 

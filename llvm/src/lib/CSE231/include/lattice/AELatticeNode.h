@@ -3,10 +3,10 @@
 
 #include<map>
 
-#include "llvm/IR/Module.h""
+#include "llvm/IR/Module.h"
 #include "llvm/IR/Instructions.h"
 
-#include "LatticeNode.h"
+#include "./latticeNode.h"
 
 using namespace std;
 using namespace llvm;
@@ -22,18 +22,18 @@ public:
 
 	AELatticeNode() : LatticeNode(AE) {}
 
-	AELatticeNode(bool b, bool t, map<Value*, Instruction*> _node) {
-		isbottom = b;
-		istop = t;
+	AELatticeNode(bool b, bool t, map<Value*, Instruction*> _node) : LatticeNode(AE, b, t) {
 		node = _node;
 	}
 
-	AELatticeNode(const AELatticeNode &copy) {
-		isbottom = copy.getIsBottom();
-		istop = copy.getIsTop();
-		lkind = copy.getKind();
+	AELatticeNode(const AELatticeNode &copy) : LatticeNode(copy.lkind, copy.isbottom, copy.istop) {
 		node = copy.node;
 	}
+
+
+	static bool classof(const LatticeNode *L) {
+    	return L->lkind == AE;
+  	}
 
 	LatticeNode* join(LatticeNode* in);
 	void PrintInfo();

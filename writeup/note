@@ -1,0 +1,1 @@
+If use dyn_cast, we have to implement classof method.
