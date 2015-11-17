@@ -30,6 +30,9 @@ public:
 		node = copy.node;
 	}
 
+	AELatticeNode(const AELatticeNode *copy) : LatticeNode(copy->lkind, copy->isbottom, copy->istop) {
+		node = copy->node;
+	}
 
 	static bool classof(const LatticeNode *L) {
     	return L->lkind == AE;
