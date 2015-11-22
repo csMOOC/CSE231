@@ -32,7 +32,7 @@ struct CSEpass : public FunctionPass {
 		AELatticeNode bottom(true, false);
 		map<Instruction*, LatticeNode*> mymap = dataFlowAnalysis(F, *f, &bottom);
 
-		errs() << "the size of mymap is :" << mymap.size() << "\n\n";
+		errs() << "the size of mymap is :" << mymap.size() << "\n\n\n";
 		return false;
 	}
 

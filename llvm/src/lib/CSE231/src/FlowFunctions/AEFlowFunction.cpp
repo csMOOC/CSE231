@@ -20,8 +20,8 @@ vector<LatticeNode*> AEFlowFunction::operator()(Instruction *ins, vector<Lattice
 
 void AEFlowFunction::visitCallInst(CallInst &ci) {
 	errs() << "Enter Call Instruction\n";
-	LatticeNode *node = new LatticeNode(AELatticeNode::AE, true, false);
-	out.push_back(node);
+	AELatticeNode *ae = new AELatticeNode(true, false);
+	out.push_back(ae);
 	errs() << "Leave Call Instruction\n";
 }
 
