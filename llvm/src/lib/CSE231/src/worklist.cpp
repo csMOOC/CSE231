@@ -125,9 +125,9 @@ map<Instruction*, LatticeNode*> dataFlowAnalysis(Function &F, FlowFunction &f, L
 		worklist.push_back(bb);
 	}
 	
-	errs() << "Initialized size of worklist L " << worklist.size() << "\n";
+	//errs() << "Initialized size of worklist L " << worklist.size() << "\n";
 	
-	errs() << "BEGIN : apply flow function \n";
+	//errs() << "BEGIN : apply flow function \n";
 
 	//run until worklist is empty, that is to say we are in a fixed point.
 	while(!worklist.empty()) {
@@ -142,7 +142,7 @@ map<Instruction*, LatticeNode*> dataFlowAnalysis(Function &F, FlowFunction &f, L
 		}
 	}
 	
-	errs() << "END : Basic Block analysis finished \n";
+	//errs() << "END : Basic Block analysis finished \n";
 
 	//Build result for each instruction
 	map<Instruction*, LatticeNode*> result;

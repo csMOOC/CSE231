@@ -28,7 +28,7 @@ public:
 	void visitCmpInst(CmpInst&);
 	void visitBinaryOperator(BinaryOperator&);
 	void visitPHINode(PHINode&);	
-	
+	void visitCallInst(CallInst&);
 
 };
 

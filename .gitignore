@@ -1,5 +1,5 @@
 !llvm/src/lib/CSE231/
-
+*.swp
 *.txt
 *.gz
 package.sh

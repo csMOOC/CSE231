@@ -1,8 +1,9 @@
 #include "../../include/flowfunction/AEFlowFunction.h"
 
 vector<LatticeNode*> AEFlowFunction::operator()(Instruction *ins, vector<LatticeNode*> in) {
-	errs() << "Enter AE flow function\n";
+	//errs() << "Enter AE flow function\n";
 	ins->print(errs());
+	errs() << "\n";
 
 	for(vector<LatticeNode*>::iterator it = in.begin(); it != in.end(); it++) {
 		AELatticeNode* node = dyn_cast<AELatticeNode>(*it);
@@ -13,8 +14,15 @@ vector<LatticeNode*> AEFlowFunction::operator()(Instruction *ins, vector<Lattice
 
 	this->visit(ins);
 
-	errs() << "Leave AE flow function\n";
+	//errs() << "Leave AE flow function\n";
 	return out;
+}
+
+void AEFlowFunction::visitCallInst(CallInst &ci) {
+	errs() << "Enter Call Instruction\n";
+	LatticeNode *node = new LatticeNode(AELatticeNode::AE, true, false);
+	out.push_back(node);
+	errs() << "Leave Call Instruction\n";
 }
 
 void AEFlowFunction::visitBranchInst(BranchInst &bi) {
