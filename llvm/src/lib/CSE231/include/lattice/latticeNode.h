@@ -46,8 +46,11 @@ public:
 		return isbottom;
 	}
 
-	virtual LatticeNode* join(LatticeNode* in) = 0;
-	virtual void PrintInfo() = 0;
+	virtual LatticeNode* join(LatticeNode* in) {return in;}
+
+	virtual bool equal (LatticeNode*) {return false;}
+
+	virtual void PrintInfo() {}
 };
 
 #endif

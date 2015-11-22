@@ -39,6 +39,9 @@ public:
   	}
 
 	LatticeNode* join(LatticeNode* in);
+
+	bool equal(LatticeNode* in);
+
 	void PrintInfo();
 };
 

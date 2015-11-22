@@ -20,6 +20,23 @@ LatticeNode* AELatticeNode::join(LatticeNode *in) {
 	return res;
 }
 
+bool AELatticeNode::equal(LatticeNode *in) {
+	
+	AELatticeNode* AEin =  dyn_cast<AELatticeNode>(in);
+	map<Value*, Instruction*> node1 = this->node;
+ 	map<Value*, Instruction*> node2 = AEin->node;
+
+	if(node1.size() != node2.size()) return false;
+
+	for(auto e : node1) {
+		Value *v = e.first;
+		Instruction *i = e.second;
+		if(node2.count(v) < 1) return false;
+		if(i != node2[v]) return false;
+	}
+	return true;
+}
+
 void AELatticeNode::PrintInfo() {
 	errs() << "			Debug Info for AE Lattice Point" << "\n";
 	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << "\n";
