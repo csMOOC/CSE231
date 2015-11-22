@@ -44,10 +44,7 @@ void AELatticeNode::PrintInfo() {
 		Value* v = it->first;
 		Instruction* i = it->second;
 		v->print(errs());
-		errs() << v;
-		errs() << "----->";
-		i->print(errs());
-		errs() << i;
+		errs() << "   	" << i;
 		errs() << "\n";
 	}
 }

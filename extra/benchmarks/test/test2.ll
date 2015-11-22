@@ -25,7 +25,9 @@ declare i32 @__cxa_atexit(void (i8*)*, i8*, i8*) #1
 ; Function Attrs: nounwind uwtable
 define i32 @main() #2 {
 entry:
-  ret i32 5
+  %add = add nsw i32 1, 2
+  %add1 = add nsw i32 1, 2
+  ret i32 %add1
 }
 
 define internal void @_GLOBAL__I_a() section ".text.startup" {

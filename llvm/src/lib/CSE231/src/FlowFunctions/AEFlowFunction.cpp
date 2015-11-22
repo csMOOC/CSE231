@@ -27,22 +27,21 @@ void AEFlowFunction::visitCallInst(CallInst &ci) {
 
 void AEFlowFunction::visitBranchInst(BranchInst &bi) {
 	errs() << "Enter Branch Instruction\n";
-	AELatticeNode *ae = new AELatticeNode(*Realin[0]);
+	AELatticeNode *ae = new AELatticeNode(*(Realin.back()));
 	out.push_back(ae);
 	errs() << "Leave Branch Instruction\n";
 }
 
 void AEFlowFunction::visitCmpInst(CmpInst &ci) {
 	errs() << "Enter cmp Instruction\n";
-	AELatticeNode *ae = new AELatticeNode(*Realin[0]);
+	AELatticeNode *ae = new AELatticeNode(*(Realin.back()));
 	out.push_back(ae);
 	errs() << "Leave cmp Instruction\n";
 }
 
 void AEFlowFunction::visitBinaryOperator(BinaryOperator &bo) {
 	errs() << "Enter Binary Operator\n";
-	map<Value*, Instruction*> node = Realin[0] -> node;
-	
+	map<Value*, Instruction*> node = Realin.back() -> node;
 	if(node.count(&bo) > 0) {
 		//I don't if this situation will happen? It is SSA.
 		errs() << "AE Binary Operator, meet same assignment\n";

@@ -24,15 +24,21 @@ struct CSEpass : public FunctionPass {
 	CSEpass() : FunctionPass(ID) {}
 
 	virtual bool runOnFunction(Function &F) {
-		
-		errs() << F.getName() << "\n";
+		string Fname = F.getName();
+		errs() << Fname << "\n";
 
 		AEFlowFunction aef;		
 		FlowFunction *f = dyn_cast<FlowFunction>(&aef);
 		AELatticeNode bottom(true, false);
 		map<Instruction*, LatticeNode*> mymap = dataFlowAnalysis(F, *f, &bottom);
 
-		errs() << "the size of mymap is :" << mymap.size() << "\n\n\n";
+		if(Fname == "main") {
+			errs() << "in main\n";
+			for(auto e : mymap) {
+				(e.second)->PrintInfo();
+			}
+		}
+		errs() << "the size of mymap is :" << mymap.size() << "\n\n";
 		return false;
 	}
 

@@ -2,7 +2,11 @@
 #include<iostream>
 
 int main() {
-		
-	int a = 2 + 3;
-	return a;
+	
+	int a = 1;
+	int b = 2;
+	int c = 3;	
+	int d = a + b;
+	int e = a + b;
+	return e;
 }
