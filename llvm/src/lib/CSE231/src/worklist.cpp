@@ -26,7 +26,7 @@ vector<LatticeNode*> nonTerInsFlowFun(FlowFunction &flow, Instruction *I, vector
 	vector<LatticeNode*> out;
 	if(isa<AEFlowFunction>(&flow)) {
 		AEFlowFunction* f = cast<AEFlowFunction>(&flow);
-      	out = (*f)(I, in);
+		out = (*f)(I, in);
 	} else {
 		errs() << "Undefined flow function";
 	}

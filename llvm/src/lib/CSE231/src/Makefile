@@ -6,6 +6,6 @@ LEVEL = ../../..
 
 LIBRARYNAME=worklist
 
-DIRS=lattices FlowFunctions
+DIRS=lattices FlowFunctions optimizations
 
 include $(LEVEL)/Makefile.common

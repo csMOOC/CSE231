@@ -22,16 +22,15 @@ public:
 
 	AELatticeNode() : LatticeNode(AE) {}
 
+	AELatticeNode(bool b, bool t) : LatticeNode(AE, b, t) {
+	}
+
 	AELatticeNode(bool b, bool t, map<Value*, Instruction*> _node) : LatticeNode(AE, b, t) {
 		node = _node;
 	}
 
 	AELatticeNode(const AELatticeNode &copy) : LatticeNode(copy.lkind, copy.isbottom, copy.istop) {
 		node = copy.node;
-	}
-
-	AELatticeNode(const AELatticeNode *copy) : LatticeNode(copy->lkind, copy->isbottom, copy->istop) {
-		node = copy->node;
 	}
 
 	static bool classof(const LatticeNode *L) {
