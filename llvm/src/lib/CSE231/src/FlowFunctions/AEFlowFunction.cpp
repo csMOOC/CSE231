@@ -5,6 +5,7 @@ vector<LatticeNode*> AEFlowFunction::operator()(Instruction *ins, vector<Lattice
 	ins->print(errs());
 	errs() << "\n";
 
+	Realin.clear();
 	for(vector<LatticeNode*>::iterator it = in.begin(); it != in.end(); it++) {
 		AELatticeNode* node = dyn_cast<AELatticeNode>(*it);
 		Realin.push_back(node);
