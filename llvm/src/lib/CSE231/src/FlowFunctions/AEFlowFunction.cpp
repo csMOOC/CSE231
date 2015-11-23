@@ -44,9 +44,11 @@ void AEFlowFunction::visitBinaryOperator(BinaryOperator &bo) {
 	errs() << "Enter Binary Operator\n";
 	map<Value*, Instruction*> node = Realin.back() -> node;
 	if(node.count(&bo) > 0) {
-		//I don't if this situation will happen? It is SSA.
-		errs() << "AE Binary Operator, meet same assignment\n";
-		//out = Realin;
+		//While , For will trigger second and more visiting.
+		errs() << "AE Binary Operator, redefined\n";
+		AELatticeNode *ae = new AELatticeNode(*(Realin.back()));
+		out.push_back(ae);
+		return;
 	}
 
 	//continue process
@@ -76,7 +78,8 @@ void AEFlowFunction::visitBinaryOperator(BinaryOperator &bo) {
 
 void AEFlowFunction::visitPHINode(PHINode &phi) {
 	errs() << "Enter PHI Node\n";
-
+	
+/*
 	int in_edges_num = phi.getNumIncomingValues();
 	
 	assert(in_edges_num == 2);
@@ -99,9 +102,8 @@ void AEFlowFunction::visitPHINode(PHINode &phi) {
 		ins = in1[left];
 		found = true;
 	}
-
+*/
 	//At first, out = in_1 join in_2 join ... join in_n
-	//In my benchmark, n is 2.
 	while(Realin.size() > 1) {
 		AELatticeNode *node1 = Realin.back();
 		Realin.pop_back();
@@ -111,10 +113,13 @@ void AEFlowFunction::visitPHINode(PHINode &phi) {
 		Realin.push_back(joinnode);
 	}
 
+	/*
 	if(found) {
 		Value* key = &phi;
 		Realin[0]->node[key] = ins;
-	}
+	}*/
 
+	AELatticeNode *ae = new AELatticeNode(*(Realin.back()));
+	out.push_back(ae);
 	errs() << "Leave PHI Node\n";
 }

@@ -19,14 +19,11 @@ uage : opt -mem2reg phi.bc > phi2.bc
 
 LLVM instruction type. 
 
-* UnaryInstruction
 * BinaryOperator
 * CmpInst
 * CallInst
 * BranchInst
 * PHINode
-
-
 
 
 ## CSE

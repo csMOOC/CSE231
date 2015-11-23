@@ -8,7 +8,8 @@ VERSION
 
 .DS_Store
 
-
+*.ll
+*.bc
 
 Makefile
 extra/Makefile
