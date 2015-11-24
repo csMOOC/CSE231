@@ -5,7 +5,10 @@ path=$path.bc
 
 echo $path
 
-opt -mem2reg $path > temp.bc
-llvm-dis temp.bc > temp.ll
+opt -mem2reg $path > CSEnotopt.bc
+llvm-dis CSEnotopt.bc > CSEnotopt.ll
 
-opt -load $LLVMLIB/part2.so -CSEpass temp.ll > /dev/null
+opt -load $LLVMLIB/part2.so -CSEpass < CSEnotopt.ll > CSEopt.bc
+llvm-dis CSEopt.bc > CSEopt.ll
+
+rm *.bc

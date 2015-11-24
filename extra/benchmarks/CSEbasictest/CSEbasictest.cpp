@@ -8,5 +8,5 @@ int main() {
 	int c = 3;	
 	int d = a + b;
 	int e = a + b;
-	return e;
+	return a;
 }
