@@ -45,6 +45,7 @@ struct CSEpass : public FunctionPass {
 
 		//apply CSE optimizations, amazing !!!
 		vector<Instruction*> cached;
+		map<Value*, Value*> replace;
 		for(Function::iterator bb = F.begin(); bb != F.end(); bb++) {
 
 			for(BasicBlock::iterator instr = bb->begin(); instr != bb->end(); ++instr) {
@@ -58,6 +59,10 @@ struct CSEpass : public FunctionPass {
 						IRBuilder<> Builder(instr);
 						Instruction* I = instr;
 						cached.push_back(I);
+						replace[instr] = e.first;
+						while(replace.count(replace[instr]) > 0) {
+							replace[instr] = replace[replace[instr]];
+						}
 						continue;
 					}
 				}
@@ -66,9 +71,11 @@ struct CSEpass : public FunctionPass {
 
 		}
 
+
 		/* 
 		 * We should make sure this variable is not used later
 		 * Maybe bottom to up?
+		 * and apply dead code elimination. WOW!
 		 */
 		for(auto I : cached) {
 			I->eraseFromParent();	
