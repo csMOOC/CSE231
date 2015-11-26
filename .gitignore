@@ -7,7 +7,7 @@ startenv.sh
 VERSION
 
 .DS_Store
-
+*~
 *.ll
 *.bc
 

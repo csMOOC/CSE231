@@ -26,13 +26,14 @@ struct CSEpass : public FunctionPass {
 
 	virtual bool runOnFunction(Function &F) {
 		string Fname = F.getName();
-		errs() << Fname << "\n";
+		errs() << Fname << "\n\n";
 
 		AEFlowFunction aef;		
 		FlowFunction *f = dyn_cast<FlowFunction>(&aef);
 		AELatticeNode bottom(true, false);
 		map<Instruction*, LatticeNode*> mymap = dataFlowAnalysis(F, *f, &bottom);
 
+		errs() << Fname << "data flow analysis finished!!! \n\n";
 		/*
 		if(Fname == "main") {
 			errs() << "in main\n";
@@ -44,41 +45,47 @@ struct CSEpass : public FunctionPass {
 		*/
 
 		//apply CSE optimizations, amazing !!!
-		vector<Instruction*> cached;
-		map<Value*, Value*> replace;
-		for(Function::iterator bb = F.begin(); bb != F.end(); bb++) {
+		stack<BasicBlock*> BBS;
+		for(auto e = F.begin(); e != F.end(); ++e)
+			BBS.push(e);
+		while(!BBS.empty()) {
 
-			for(BasicBlock::iterator instr = bb->begin(); instr != bb->end(); ++instr) {
-				
-				LatticeNode* base = mymap[instr];
+			auto bb = BBS.top();
+			BBS.pop();
+
+			stack<Instruction*> IS;
+			for(auto e = bb->begin(); e != bb->end(); ++e) 
+				IS.push(e);
+
+			while(!IS.empty()) {
+
+				auto I = IS.top();
+				IS.pop();
+
+				LatticeNode* base = mymap[I];
 				AELatticeNode* CSEnode = dyn_cast<AELatticeNode>(base);
 				map<Value*, Instruction*> info = CSEnode->node;
 
+				//string opname = I->getOpcodeName();
+				//if(opname == "ret" && I->getNumOperands() == 1) errs() << "signal ret	" << I->getOperand(0) << "\n";
+				//errs() << "	" << I->getNumOperands() << "	" << I << "\n";
+
+				for (auto OI = I->op_begin(), OE = I->op_end(); OI != OE; ++OI) {
+    				Value *val = *OI;
+    				auto iter = info.find( val );
+
+    				if( iter != info.end( ) ) {
+        				*OI = (Value*)iter->second;
+    				}
+				}
+		
 				for(auto e : info) {
-					if((e.second)->isIdenticalToWhenDefined(instr)) {
-						IRBuilder<> Builder(instr);
-						Instruction* I = instr;
-						cached.push_back(I);
-						replace[instr] = e.first;
-						while(replace.count(replace[instr]) > 0) {
-							replace[instr] = replace[replace[instr]];
-						}
-						continue;
+					if((e.second)->isIdenticalToWhenDefined(I)) {
+						I -> eraseFromParent();
 					}
 				}
-
 			}
 
-		}
-
-
-		/* 
-		 * We should make sure this variable is not used later
-		 * Maybe bottom to up?
-		 * and apply dead code elimination. WOW!
-		 */
-		for(auto I : cached) {
-			I->eraseFromParent();	
 		}
 
 		return false;

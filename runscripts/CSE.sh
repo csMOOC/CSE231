@@ -8,7 +8,7 @@ echo $path
 opt -mem2reg $path > CSEnotopt.bc
 llvm-dis CSEnotopt.bc > CSEnotopt.ll
 
-opt -load $LLVMLIB/part2.so -CSEpass < CSEnotopt.ll > CSEopt.bc
+opt -load $LLVMLIB/part2.so -CSEpass < CSEnotopt.bc > CSEopt.bc
 llvm-dis CSEopt.bc > CSEopt.ll
 
 rm *.bc
