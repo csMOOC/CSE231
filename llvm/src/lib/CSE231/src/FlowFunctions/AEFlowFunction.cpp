@@ -55,6 +55,7 @@ void AEFlowFunction::visitBinaryOperator(BinaryOperator &bo) {
 	Value* key = &bo;
 	Instruction* value;
 	bool found = false;
+	string opname = bo.getOpcodeName();
 	
 	for(map<Value*, Instruction*>::iterator it = node.begin(); it != node.end(); ++it) {
 		Instruction* cache_instruction = it->second;
@@ -62,6 +63,21 @@ void AEFlowFunction::visitBinaryOperator(BinaryOperator &bo) {
 			found = true;
 			value = cache_instruction;
 			break;
+		}
+		
+		/* 
+		 * special case
+		 * handle case like 1+2 / 2+1
+		 */
+		if(opname == "add") {
+			bo.swapOperands();
+			if(cache_instruction->isIdenticalToWhenDefined(&bo)) {
+				found = true;
+				value = cache_instruction;
+				bo.swapOperands();
+				break;
+			}
+			bo.swapOperands();
 		}
 	}
 

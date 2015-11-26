@@ -30,14 +30,12 @@ LLVM instruction type.
 
 ###Most east test case
 
-	int main() {	
-		int a = 1;
-		int b = 2;
-		int d = a + b;
-		int e = a + b;   %add = add nsw i32 1, 2   	    0x30ccf30
-  						 %add1 = add nsw i32 1, 2   	0x30ccf30    point to same instruction address. works.
-		return e;
-	}
+	int a = 1;
+	int b = 2;
+	int d = a + b;
+	int e = a + b;   %add = add nsw i32 1, 2   	    0x30ccf30
+  					 %add1 = add nsw i32 1, 2   	0x30ccf30    point to same instruction address. works.
+	return e;
 
 .ll
 
@@ -48,20 +46,18 @@ LLVM instruction type.
 
 ###CSE Branch test case
 
-	int main() {	
-		int a = 1;
-		int b = 2;
-		int c = 3;
-		int d = a+b;
-		if(c > 0) {
-			int f1 = a + b;
-		} else {
-			int f2 = a + b;
-		}
-		int e = b + c;
-		d = b + c;
-		return e;
+	int a = 1;
+	int b = 2;
+	int c = 3;
+	int d = a+b;
+	if(c > 0) {
+		int f1 = a + b;
+	} else {
+		int f2 = a + b;
 	}
+	int e = b + c;
+	d = b + c;
+	return e;
 
 .ll
 
@@ -111,19 +107,33 @@ Analysis result
   		%add3 = add nsw i32 2, 3   	0x28247a0
 		%add4 = add nsw i32 2, 3   	0x28247a0
 
+
+An interesting case we handle correctly
+
+	int f1 = 1;
+	int f2 = 2;
+	int a = f1 + f2;
+	if(a > 0) {
+		int b = f1 + f2;
+	} else {
+		int c = f2 + f1;
+	}
+	return 1;
+
+
+
+
 Cases we did not handle
 
-	int main() {
-		int a = 1;
-		int b = 2;
-		int c = 3;
-		if(c > 0) {
-			int f1 = a + b;
-		} else {
-			int f2 = a + b;
-		}
-		return a + b;
+	int a = 1;
+	int b = 2;
+	int c = 3;
+	if(c > 0) {
+		int f1 = a + b;
+	} else {
+		int f2 = a + b;
 	}
+	return a + b;
 
 .ll
 

@@ -57,6 +57,8 @@ struct CSEpass : public FunctionPass {
 			for(auto e = bb->begin(); e != bb->end(); ++e) 
 				IS.push(e);
 
+			vector<Instruction*> deletes;
+
 			while(!IS.empty()) {
 
 				auto I = IS.top();
@@ -66,10 +68,7 @@ struct CSEpass : public FunctionPass {
 				AELatticeNode* CSEnode = dyn_cast<AELatticeNode>(base);
 				map<Value*, Instruction*> info = CSEnode->node;
 
-				//string opname = I->getOpcodeName();
-				//if(opname == "ret" && I->getNumOperands() == 1) errs() << "signal ret	" << I->getOperand(0) << "\n";
-				//errs() << "	" << I->getNumOperands() << "	" << I << "\n";
-
+				//replace operands with existing calculated one
 				for (auto OI = I->op_begin(), OE = I->op_end(); OI != OE; ++OI) {
     				Value *val = *OI;
     				auto iter = info.find( val );
@@ -78,14 +77,18 @@ struct CSEpass : public FunctionPass {
         				*OI = (Value*)iter->second;
     				}
 				}
-		
-				for(auto e : info) {
-					if((e.second)->isIdenticalToWhenDefined(I)) {
-						I -> eraseFromParent();
-					}
+
+				//check useless instruction
+				if(!IS.empty()) {
+					Instruction *pre = IS.top();
+					if(info.count(pre) > 0 && info[pre] != pre)
+						deletes.push_back(pre);
 				}
+		
 			}
 
+			for(auto e : deletes)
+				e -> eraseFromParent();
 		}
 
 		return false;
