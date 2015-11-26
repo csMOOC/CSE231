@@ -110,3 +110,41 @@ Analysis result
   		%add = add nsw i32 1, 2   	0x281e070
   		%add3 = add nsw i32 2, 3   	0x28247a0
 		%add4 = add nsw i32 2, 3   	0x28247a0
+
+Cases we did not handle
+
+	int main() {
+		int a = 1;
+		int b = 2;
+		int c = 3;
+		if(c > 0) {
+			int f1 = a + b;
+		} else {
+			int f2 = a + b;
+		}
+		return a + b;
+	}
+
+.ll
+
+	entry:
+  		%cmp = icmp sgt i32 3, 0
+  		br i1 %cmp, label %if.then, label %if.else
+
+	if.then:                                          ; preds = %entry
+  		%add = add nsw i32 1, 2
+  		br label %if.end
+
+	if.else:                                          ; preds = %entry
+  		%add1 = add nsw i32 1, 2
+  		br label %if.end
+
+	if.end:                                           ; preds = %if.else, %if.then
+  		%add2 = add nsw i32 1, 2
+  		ret i32 %add2
+
+a+b is a common expression when **return a+b**. But we can not determine it is f1 or f2. Actually we can apply phinode in LLVM and change code like this
+
+	if.end:
+		%add2 = phi i32 [ %add, %if.then ], [ %add1, %if.else ]
+However, when we have k branches, we will have k-1 phinodes, which will bring unnecessary transformations. Because calculating **1+2** is so cheap!!!  
