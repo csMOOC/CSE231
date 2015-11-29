@@ -86,9 +86,9 @@ void PAFlowFunction::visitLoadInst(LoadInst &ai) {
 	assert(v != 0);
 
 	if(pa->isTempReg(v)) {
-		pa->node[&ai] = pa->node[pa->node[v]];
+		pa->node[(Value*)&ai] = pa->node[pa->node[v]];
 	} else {
-		pa->node[&ai] = pa->node[v];
+		pa->node[(Value*)&ai] = pa->node[v];
 	}
 
 	out.push_back(pa);

@@ -41,7 +41,7 @@ struct PApass : public FunctionPass {
 				(e.second)->PrintInfo();
 			}
 		}
-		errs() << "the size of mymap is :" << mymap.size() << "\n\n\n";
+		errs() << "the size of mymap is :" << mymap.size() << "\n\n";
 
 		return false;
 	}

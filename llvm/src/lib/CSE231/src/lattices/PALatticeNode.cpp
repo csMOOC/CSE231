@@ -40,11 +40,16 @@ bool PALatticeNode::equal(LatticeNode *in) {
 void PALatticeNode::PrintInfo() {
 	errs() << "			Debug Info for PA Lattice Point		" << "\n";
 	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << " size: " << node.size() << "\n";
+	int i = 0;
+	
 	for(map<Value*, Value*>::iterator it = node.begin(); it != node.end(); it++) {
 		Value* v1 = it->first;
 		Value* v2 = it->second;
 		//if(v2 == 0) continue;
-		errs() << ((Value*)v1)->getName() << "->";
+		string v1name = ((Value*)v1)->getName();
+		if(v1name.length() < 1) errs() << "Temporary Register " << i++ ;
+		else errs() << v1name;
+		errs() <<  "->";
 		if(isa<Constant>(v2)) {
 			Constant *c = dyn_cast<Constant>(v2);
 			errs() << c->getUniqueInteger() << "\n";
