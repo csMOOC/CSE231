@@ -27,6 +27,9 @@ vector<LatticeNode*> nonTerInsFlowFun(FlowFunction &flow, Instruction *I, vector
 	if(isa<AEFlowFunction>(&flow)) {
 		AEFlowFunction* f = cast<AEFlowFunction>(&flow);
 		out = (*f)(I, in);
+	} else if(isa<PAFlowFunction>(&flow)) {
+		PAFlowFunction* f = cast<PAFlowFunction>(&flow);
+		out = (*f)(I, in);
 	} else {
 		errs() << "Undefined flow function";
 	}
@@ -42,6 +45,12 @@ map<Value*, LatticeNode*> TerInsFlowFun(FlowFunction &flow, Instruction* I, vect
     map<Value*, LatticeNode*> outputs;
     if (isa<AEFlowFunction>(&flow)) {
     	AEFlowFunction* f = cast<AEFlowFunction>(&flow);
+		vector<LatticeNode*> res = (*f)(I, in);
+		for(auto e : outedge) {
+			outputs[e.first] = res[0];
+		}
+	} else if(isa<PAFlowFunction>(&flow)) {
+    	PAFlowFunction* f = cast<PAFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);
 		for(auto e : outedge) {
 			outputs[e.first] = res[0];

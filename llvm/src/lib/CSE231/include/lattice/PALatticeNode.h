@@ -1,5 +1,5 @@
-#ifndef AE_LATTICE_NODE_H
-#define AE_LATTICE_NODE_H
+#ifndef PA_LATTICE_NODE_H
+#define PA_LATTICE_NODE_H
 
 #include<map>
 
@@ -42,6 +42,8 @@ public:
 	bool equal(LatticeNode* in);
 
 	void PrintInfo();
+
+	bool isTempReg(Value*);
 };
 
 #endif

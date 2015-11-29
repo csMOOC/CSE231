@@ -2,10 +2,12 @@
 #include<iostream>
 
 int main() {
-	
 	int a = 1;
 	int b = 2;
+	int o = b;
 	int *c = &a;
-	c = &b;
+	int **d = &c;
+	int *f = &o;
+	f = *d;
 	return 0;
 }

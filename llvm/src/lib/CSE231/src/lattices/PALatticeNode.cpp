@@ -39,10 +39,25 @@ bool PALatticeNode::equal(LatticeNode *in) {
 
 void PALatticeNode::PrintInfo() {
 	errs() << "			Debug Info for PA Lattice Point		" << "\n";
-	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << "\n";
+	errs() << "bottom : " << this->getIsBottom() << "  top : " << this->getIsTop() << " size: " << node.size() << "\n";
 	for(map<Value*, Value*>::iterator it = node.begin(); it != node.end(); it++) {
 		Value* v1 = it->first;
 		Value* v2 = it->second;
-		errs() << v1->getName() << "	->		" << v2->getName() << "\n";
+		//if(v2 == 0) continue;
+		errs() << ((Value*)v1)->getName() << "->";
+		if(isa<Constant>(v2)) {
+			Constant *c = dyn_cast<Constant>(v2);
+			errs() << c->getUniqueInteger() << "\n";
+		} else {
+			errs() << ((Value*)v2)->getName() << "\n";
+		}
 	}
+}
+
+bool PALatticeNode::isTempReg(Value* v) {
+	string name = v->getName();
+	for(char c : name)
+		if(!isdigit(c))
+			return false;
+	return true;
 }
