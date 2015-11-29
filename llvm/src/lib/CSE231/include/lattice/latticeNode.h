@@ -13,7 +13,7 @@ public:
 	* RA is short for Range Analysis
 	* IPA is short for intra-procedural pointer analysis 
 	*/
-	enum latticeKind{CP, AE, RA, IPA};
+	enum latticeKind{CP, AE, RA, PA};
 
 	bool isbottom;
 	bool istop;

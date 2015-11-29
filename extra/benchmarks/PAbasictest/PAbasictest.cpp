@@ -4,7 +4,8 @@
 int main() {
 	
 	int a = 1;
-	int *b = &a;
-	*b = 2;
-	return a;
+	int b = 2;
+	int *c = &a;
+	c = &b;
+	return 0;
 }
