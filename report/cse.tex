@@ -29,9 +29,80 @@ In LLVM SSA, there can't be three branches in a phi node.
 We have defined our lattice and flow functions above.
 
 \subsection{Implementation}
+We use a map to represent information of a lattice node. the key of map is Value*, and the value of map is Instruction*. We map a variable to the instruction where it is first defined. 
 
+To check if an instruction is already defined is very simple in LLVM. For example, if we have following codes :
+\begin{verbatim}
+L1 : %add = add nsw i32 1, 2
+L2 : %add1 = add nsw i32 1, 2
+\end{verbatim}
+Then by call API \emph{isIdenticalToWhenDefined}, we can check L1 and L2 are the same. As a result, we map \%add and \%add2 to the same instruction.
+
+When join, we perform intersection on left side input and right side input.
 
 \subsection{Optimization}
+Let's review the above code. Generally speaking, we want to transform out code like this:
+\begin{verbatim}
+L1 : %add = add nsw i32 1, 2
+L2 : %add1 = %add
+\end{verbatim}
+However, when we apply mem2reg pass, there is no single assignment instruction and we can't transform code like this. So I apply a general optimization using available expression analysis. Looking at the following code:
 
+\begin{verbatim}
+L1 : %add = add nsw i32 1, 2
+L2 : %add1 = add nsw i32 1, 2
+L3 : ret i32 %add1
+\end{verbatim}
+
+We know that \%add1 is pointing to L1, so we use \%add to replace \%add1 in ret instruction, then L2 is dead code, we just simply remove it. By this way, we transform original code like this:
+\begin{verbatim}
+L1 : %add = add nsw i32 1, 2
+L3 : ret i32 %add
+\end{verbatim}
+
+It is a useful optimization.
 
 \subsection{Benchmark}
+We provide 4 benchmarks for available expression analysis, including CSEbasictest, CSEbranch, CSEbranch2	 and CSEphi.
+
+Here I show an interesting test case named CSEbranch2 :
+	
+\begin{verbatim}
+	int f1 = 1;
+	int f2 = 2;
+	int a = f1 + f2;
+	if(a > 0) {
+	    int b = f1 + f2;
+	} else {
+	    int c = f2 + f1;
+	}
+	return 1;
+\end{verbatim}
+
+In this case, c = f2 + f1 is the common expression of a = f1 + f2. But the API isIdenticalToWhenDefined can't recognize this. Because this method checks operands one by one, so it return false. But it is not the case because they are definitely same. So When dealing with add instruction, we add one more check : we swap the operands and call isIdenticalToWhenDefined one more time to ensure we can handle this case.
+
+\subsection{Discussion}
+Consider the following code
+\begin{verbatim}
+entry:
+    %cmp = icmp sgt i32 3, 0
+    br i1 %cmp, label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+    %add = add nsw i32 1, 2
+    br label %if.end
+
+if.else:                                          ; preds = %entry
+    %add1 = add nsw i32 1, 2
+    br label %if.end
+
+if.end:                                           ; preds = %if.else, %if.then
+    %add2 = add nsw i32 1, 2
+    ret i32 %add2
+\end{verbatim}
+For \%add2, we know add new i32 1, 2 is an available expression, and we could transform code like this:
+\begin{verbatim}
+if.end:
+    %add2 = phi i32 [ %add, %if.then ], [ %add1, %if.else ]
+\end{verbatim}
+But I didn't apply this transformation. If you have many branches, then this method will create many basic blocks and phi nodes, which will bring unnecessary transformations. Because calculating 1+2 is so cheap, we didn't do optimizations for it.
