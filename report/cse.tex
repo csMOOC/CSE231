@@ -1,0 +1,37 @@
+\section{AVALIABLE EXPRESSION ANALYSIS}
+In this section, we present available expression analysis.
+
+\subsection{Assumptions}
+We run this analysis on the basis of mem2reg pass, SSA form makes this task much simpler. It is a must analysis.
+
+\subsection{Lattice and Flow Function}
+
+\begin{align} 
+	\begin{split}
+		(D, \top, \bot, \sqcup, \sqcap, \sqsubseteq) = (2^{x \to y | x \in Vars \wedge y \in Exprs}, \emptyset, x \to y | x \in Vars \wedge y \in Exprs, \cap, \cup, \subseteq)
+	\end{split}
+\end{align}
+
+In SSA, we don't care if we will overwrite an existing variable. Each assignment will produce a new variable in SSA.
+\begin{align} 
+	\begin{split}
+		F_{X := Y op Z}(in) = in  \cup \{ X \to Y op Z \}
+	\end{split}
+\end{align}
+
+In LLVM SSA, there can't be three branches in a phi node.
+\begin{align} 
+	\begin{split}
+		F_{X := \Phi(Y_1, Y_2)}(in_1, in_2) = in_1 \cap in_2  \cup \{x \to y | x \to y \in in_1 \wedge x \to y \in in_2\}
+	\end{split}
+\end{align}
+
+We have defined our lattice and flow functions above.
+
+\subsection{Implementation}
+
+
+\subsection{Optimization}
+
+
+\subsection{Benchmark}

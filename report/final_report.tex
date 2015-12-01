@@ -1,0 +1,139 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Example: Project Report
+%
+% Source: http://www.howtotex.com
+%
+% Feel free to distribute this example, but please keep the referral
+% to howtotex.com
+% Date: March 2011 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on the
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+% If you're new to LaTeX, the wikibook is a great place to start:
+% http://en.wikibooks.org/wiki/LaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the title below to update the display in My Documents
+%\title{Project Report}
+%
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+
+
+%%% Custom sectioning
+\usepackage{sectsty}
+\allsectionsfont{\centering \normalfont\scshape}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot[L]{}											% Empty 
+\fancyfoot[C]{}											% Empty
+\fancyfoot[R]{\thepage}									% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{School of Computer Science Engineering} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge CSE 231 Project Report\\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont 								\normalsize
+        Zhenchao Gan\\[-3pt]		\normalsize
+        Tao Li\\[-3pt]		\normalsize
+        Antonella Wilby\\[-3pt]		\normalsize
+        \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+\section{OVERVIEW}
+
+In this project, based on LLVM we implemented an intra-procedure analysis and optimization framework. Our framework runs worklist algorithm on LLVM IR code and stop until meet a fixed point. This framework takes a lattice bottom node and corresponding flow function to start with, iterate over and over again and finally build all the information we need. 
+
+We carried out for analysis including available expressions analysis, constant propagation, range analysis and intra-procedural pointer analysis. The first three analysis are based on LLVM mem2reg pass. Mem2reg pass promotes memory references to be register references. It promotes alloca instructions which only have loads and stores as uses. This pass is very useful such that we will not be disturbed by complicated memory problem. However, this pass has helped us finish pointer analysis, so before applying intra-procedure pointer analysis we have to close this pass.
+
+Based on available expression analysis, we can apply common subexpression elimination and dead code elimination. Base on constant propagation, we can apply constant folding. Based on range analysis, we can implement bug finder to warn programmer if can’t show array access in bounds. Because these analysis are based on mem2reg pass, our own intra-procedure analysis is just to present information we gathered.
+
+
+
+
+\section{FRAMEWORK}
+
+In this section, we represent framework interface design and introduce important APIs that used in worklist algorithm.
+
+\subsection{Interface Design}
+
+We will discuss two base classes, one is LatticeNode which represents a node in lattice, the other one is FlowFunction.\\ \\
+LatticeNode is the base class of the four concrete lattice nodes. The common attributes of LatticeNode includes
+\begin{enumerate}
+\item istop, represents whether this lattice node is in top.
+\item isbottom, represents whether this lattice node is in bottom.
+\item kind, represents the kind of this lattice node.
+\end{enumerate}
+Besides, it provides following common APIs
+\begin{enumerate}
+\item join, provide a way to join two lattice node.
+\item PrintInfo, dump information about this lattice node.
+\end{enumerate}
+We don't need meet method, because the lattice is built from bottom to top, only upward. It is impossible to go downwards. \\ \\
+FlowFunction is the base class of the four concrete flow functions. We overrided the () operator, making it much more like a function. () operator defines what we will get after going through an instruction when given input. \\ \\
+All the subclasses must inherit base class and implement these interfaces.
+
+\subsection{Worklist}
+Our wordlist algorithm takes three parameters, a procedure F, a starting lattice node initialized at bottom and a flow function. Then we will run a forward optimistic iterative dataflow analysis that computes a piece of information at the beginning of each instruction.
+
+The control flow graph in LLVM is based on basic blocks and in LLVM there is no explicit representation of edges. Because of this, the best way to store information while doing your fixed point computation is to store one piece of information for the beginning of each basic block. To represent the edges, we use pre\_block--post\_block pair as key and lattice node as value to store information. It is easy with LLVM to build the pre\_block and post\_block relationship. Then we apply block-level flow function on the control flow graph.
+
+When we reached a fixed point, we get the information at the beginning of each basic block. Next we should propagate the information to each instruction. So, in each instruction within a block, we run instruction-level flow function and finally get the information at the beginning of each instruction.
+
+\subsection{Pass}
+
+For each analysis, we create a corresponding pass to make use of the information produced by the analysis. For example, if we have the result of available expression, we could further apply common subexpression elimination and dead code elimination optimisation. 
+
+
+\include{cse}
+\include{pa}
+\include{cp}
+\include{ra}
+\include{conclusion}
+%%% End document
+\end{document}

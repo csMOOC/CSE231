@@ -6,6 +6,11 @@ package.sh
 startenv.sh
 VERSION
 
+*.aux
+*.log
+*.pdf
+*.gz
+
 .DS_Store
 *~
 *.ll
