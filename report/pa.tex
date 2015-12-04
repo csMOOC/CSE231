@@ -1,11 +1,101 @@
 \section{INTRA-PROCEDURE POINTER ANALYSIS}
+In this section, we present intra-procedure analysis. We worked on a must-point-to analysis.
 
 \subsection{Assumptions}
+If we run mem2reg pass, we can't apply our own intra-procedure analysis because this pass has already done this task. So before working on it, we closed this pass. If X and Y are variables and the memory of X points to the memory of Y, then we build a mapping from X to Y. If Y is a constant, we build a map from X to constant C, meaning that X is a constant.
 
 \subsection{Lattice and Flow Function}
+\begin{align} 
+	\begin{split}
+		(D, \top, \bot, \sqcup, \sqcap, \sqsubseteq) = (2^{x \to y | x \in Vars \wedge y \in Vars}, \emptyset, x \to y | x \in Vars \wedge y \in Vars, \cap, \cup, \subseteq)
+	\end{split}
+\end{align}
+
+When we analyze pointers, there are two important instructions In LLVM, load and store.  Store is a memory store and load is a memory load as well.
+
+\begin{align} 
+	\begin{split}
+		F_{store(X, Y)}(in) = in  - \{Y \to *\}\cup \{ Y \to X\}  \\
+		F_{X := load(Y)}(in) = in  - \{X \to *\}\cup \{ X \to \{what Y points-to\}\} \\
+	\end{split}
+\end{align}
+
+\begin{align} 
+	\begin{split}
+		F_{other}(in) = in
+	\end{split}
+\end{align}
+
+\begin{align} 
+	\begin{split}
+		F_{merge}(in_1, in_2) = in_1 \cap in_2\}
+	\end{split}
+\end{align}
 
 \subsection{Implementation}
+We use a map to represent information of a lattice node. the key of map is Value*, and the value of map is a Value* as well. We map a variable to the instruction where it is first defined. 
+
+For instruction like this, 
+\begin{verbatim}
+store i32 1, i32* %a, align 4
+\end{verbatim}
+We map \%a to the constant 1 where 1 is stored. Although \%a is just a variable, in LLVM IR it is also used as a pointer.
+
+\begin{verbatim}
+store i32* %a, i32** %c, align 8 
+\end{verbatim}
+For this instruction, we simply build $\%c \to \%a$ mapping.
+
+\begin{verbatim}
+store i32** %c, i32*** %d, align 8
+%1 = load i32*** %d, align 8
+\end{verbatim}
+For these instruction, we first build $\%d \to \%c$ mapping, then we encounter a load instruction. In LLVM, if we meet a load instruction, LLVM will create a temporary register. In this example, we know that $\%1 \to \%c$. \\
+
+Combined with these examples, we know that temporary registers make things complicated. Because they occur just once and never appeared. So we must eliminate temporary registers. If $\%a \to \%1$ and $\%1 \to \%b$, then we just produce $\%a \to \%b$ and eliminate the above two mappings. This is how our algorithm works.
 
 \subsection{Benchmark}
+We provide 2 benchmarks for available expression analysis, including PAbasictest and PAbranch. Let's look at PAbasictest benchmark. Following is the C++ source code and LLVM IR.
+\begin{verbatim}
+	int a = 1;
+	int b = 2;
+	int o = b;
+	int *c = &a;
+	int **d = &c;
+	int *f = &o;
+	f = *d;
+	return 0;
+\end{verbatim}
+
+\begin{verbatim}
+L1:  store i32 0, i32* %retval
+L2:  store i32 1, i32* %a, align 4
+L3:  store i32 2, i32* %b, align 4
+L4:  %0 = load i32* %b, align 4
+L5:  store i32 %0, i32* %o, align 4
+L6:  store i32* %a, i32** %c, align 8
+L7:  store i32** %c, i32*** %d, align 8
+L8:  store i32* %o, i32** %f, align 8
+L9:  %1 = load i32*** %d, align 8
+L10: %2 = load i32** %1, align 8
+L11: store i32* %2, i32** %f, align 8
+L12: ret i32 0
+\end{verbatim}
+
+When processing L5, we find $\%o \to \%0$ and $\%0 \to 2(address)$, so we will produce $\%o \to 2(address)$.
+
+After L9, we have $\%1 \to \%c$.
+
+When processing L10, we load from register, so we map \%2 to the content where \%1 points to, that is \%a. So we have
+$\%2 \to \%a$.
+
+When processing L11, we build $\%f \to \%2$. At the same time, we find $\%2 \to \%a$, so we will produce $\%f \to \%a$.
 
 \subsection{Discussion}
+Pointer analysis is complicated and registers tend to be easier to reason about than memory. So the mem2reg pass is very useful. Without mem2reg pass, we have many alloca, load and store instructions and make other analysis very difficult. With this pass, the above code can be transform to just one instruction.
+
+\begin{verbatim}
+L1:  ret i32 0
+\end{verbatim}
+
+mem2reg pass converts non-SSA form of LLVM IR into SSA form, raising loads and stores to stack-allocated values to "registers" (SSA values). Many of LLVM optimization passes operate on the code in SSA form and thus most probably will be no-op seeing IR in non-SSA form.
