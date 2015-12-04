@@ -16,13 +16,6 @@ VERSION
 *.ll
 *.bc
 
-Makefile
-extra/Makefile
-extra/benchmarks/Makefile
-extra/benchmarks/compression/Makefile
-extra/benchmarks/gcd/Makefile
-extra/benchmarks/hadamard/Makefile
-extra/benchmarks/welcome/Makefile
 llvm/build/
 llvm/src/.arcconfig
 llvm/src/.clang-format
