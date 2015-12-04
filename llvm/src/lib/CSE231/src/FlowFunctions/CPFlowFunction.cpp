@@ -7,8 +7,9 @@ vector<LatticeNode*> CPFlowFunction::operator()(Instruction *ins, vector<Lattice
 	errs() << "\n";
 
 	Realin.clear();
-	for(vector<LatticeNode*>::iterator it = in.begin(); it != in.end(); it++) {
-		AELatticeNode* node = dyn_cast<AELatticeNode>(*it);
+	for(vector<LatticeNode*>::iterator it = in.begin(); it != in.end(); it++) 
+	{
+		CPLatticeNode* node = dyn_cast<CPLatticeNode>(*it);
 		Realin.push_back(node);
 	}
 
@@ -21,9 +22,10 @@ vector<LatticeNode*> CPFlowFunction::operator()(Instruction *ins, vector<Lattice
 
 void CPFlowFunction::visitCallInst(CallInst &ci) 
 {
+
 	errs() << "Enter Call Instruction\n";
-	CPLatticeNode *ae = new CPLatticeNode(true, false);
-	out.push_back(ae);
+	CPLatticeNode *cp = new CPLatticeNode(true, false);
+	out.push_back(cp);
 	errs() << "Leave Call Instruction\n";
 }
 
@@ -47,9 +49,10 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 {
 	errs() << "Enter Binary Operator\n";
 	map<Value*, Constant*> node = Realin.back() -> node;
-	if(node.count(&bo) > 0) {
+	if(node.count(&bo) > 0) 
+	{
 		//While , For will trigger second and more visiting.
-		errs() << "AE Binary Operator, redefined\n";
+		errs() << "CP Binary Operator, redefined\n";
 		CPLatticeNode *cp = new CPLatticeNode(*(Realin.back()));
 		out.push_back(cp);
 		return;
@@ -61,19 +64,20 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 	bool found = false;
 	string opname = bo.getOpcodeName();
 
-	for(map<Value*, Constant*>::iterator it = node.begin(); it != node.end(); ++it) {
-		Constant* cache_instruction = it->second;
+	for(map<Value*, Constant*>::iterator it = node.begin(); it != node.end(); ++it) 
+	{
+		/*Constant* cache_instruction = it->second;
 		if(cache_instruction->isIdenticalToWhenDefined(&bo)) {
 			found = true;
 			value = cache_instruction;
 			break;
 		}
-
+		*/
 		/* 
 		 * special case
 		 * handle case like 1+2 / 2+1
 		 */
-		if(opname == "add") {
+		/*if(opname == "add") {
 			bo.swapOperands();
 			if(cache_instruction->isIdenticalToWhenDefined(&bo)) {
 				found = true;
@@ -82,14 +86,15 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 				break;
 			}
 			bo.swapOperands();
-		}
+		}*/
 	}
 
+	/*
 	if(found) {
 		node[key] = value;
 	} else {
 		node[key] = dyn_cast<Instruction>(key);
-	}
+	}*/
 
 	CPLatticeNode *cp = new CPLatticeNode(false, false, node);
  	out.push_back(cp);
@@ -101,7 +106,8 @@ void CPFlowFunction::visitPHINode(PHINode &phi)
 	errs() << "Enter PHI Node\n";
 
 	//At first, out = in_1 join in_2 join ... join in_n
-	while(Realin.size() > 1) {
+	while(Realin.size() > 1) 
+	{
 		CPLatticeNode *node1 = Realin.back();
 		Realin.pop_back();
 		CPLatticeNode *node2 = Realin.back();
@@ -110,8 +116,8 @@ void CPFlowFunction::visitPHINode(PHINode &phi)
 		Realin.push_back(joinnode);
 	}
 
-	CPLatticeNode *ae = new CPLatticeNode(*(Realin.back()));
-	out.push_back(ae);
+	CPLatticeNode *cp = new CPLatticeNode(*(Realin.back()));
+	out.push_back(cp);
 	errs() << "Leave PHI Node\n";
 }
 

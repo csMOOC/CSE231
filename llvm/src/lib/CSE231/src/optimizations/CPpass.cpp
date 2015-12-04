@@ -6,7 +6,7 @@
 #include "llvm/IR/IRBuilder.h"
 
 #include "../../include/worklist.h"
-#include "../../include/lattice/CPLatticNode.h"
+#include "../../include/lattice/CPLatticeNode.h"
 #include "../../include/flowfunction/CPFlowFunction.h"
 
 #include <map>
