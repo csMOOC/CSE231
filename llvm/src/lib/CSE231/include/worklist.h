@@ -9,6 +9,7 @@
 #include "flowfunction/FlowFunction.h"
 #include "flowfunction/AEFlowFunction.h"
 #include "flowfunction/PAFlowFunction.h"
+#include "flowfunction/CPFlowFunction.h"
 
 #include <list>
 #include <map>

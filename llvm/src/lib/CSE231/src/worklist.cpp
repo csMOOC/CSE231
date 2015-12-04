@@ -24,12 +24,21 @@ pair<map<BasicBlock*, list<BasicBlock*> >, map<BasicBlock*, list<BasicBlock*> > 
  */
 vector<LatticeNode*> nonTerInsFlowFun(FlowFunction &flow, Instruction *I, vector<LatticeNode*> in) {
 	vector<LatticeNode*> out;
+
+	// Assignment Expression Flow Function
 	if(isa<AEFlowFunction>(&flow)) {
 		AEFlowFunction* f = cast<AEFlowFunction>(&flow);
 		out = (*f)(I, in);
+
+	// Pointer Analysis Flow Function
 	} else if(isa<PAFlowFunction>(&flow)) {
 		PAFlowFunction* f = cast<PAFlowFunction>(&flow);
 		out = (*f)(I, in);
+
+	// Constant Propagation Flow Function
+	} else if(isa<CPFlowFunction>(&flow)) {
+		CPFlowFunction * f = cast<CPFlowFunction>(&flow);
+		out  = (*f)(I, in);
 	} else {
 		errs() << "Undefined flow function";
 	}
@@ -43,18 +52,32 @@ vector<LatticeNode*> nonTerInsFlowFun(FlowFunction &flow, Instruction *I, vector
  */
 map<Value*, LatticeNode*> TerInsFlowFun(FlowFunction &flow, Instruction* I, vector<LatticeNode*> in,map<Value*, LatticeNode*> outedge){
     map<Value*, LatticeNode*> outputs;
-    if (isa<AEFlowFunction>(&flow)) {
-    	AEFlowFunction* f = cast<AEFlowFunction>(&flow);
+
+	// Assignment Expression Flow Function
+	if (isa<AEFlowFunction>(&flow)) {
+    		AEFlowFunction* f = cast<AEFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);
 		for(auto e : outedge) {
 			outputs[e.first] = res[0];
 		}
+	
+	// Pointer Analysis Flow Function
 	} else if(isa<PAFlowFunction>(&flow)) {
-    	PAFlowFunction* f = cast<PAFlowFunction>(&flow);
+    		PAFlowFunction* f = cast<PAFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);
 		for(auto e : outedge) {
 			outputs[e.first] = res[0];
 		}
+	
+	// Constant Propagation Flow Function
+	} else if(isa<CPFlowFunction>(&flow)) {
+		CPFlowFunction* f = cast<CPFlowFunction>(&flow);
+		vector<LatticeNode*> res = (*f)(I, in);
+
+		for(auto e : outedge) {
+			outputs[e.first] = res[0];
+		}
+
 	} else {
 		errs() << "Undefined flow function\n";
 	}
@@ -155,15 +178,15 @@ map<Instruction*, LatticeNode*> dataFlowAnalysis(Function &F, FlowFunction &f, L
 	for(auto bb = F.begin(); bb != F.end(); ++bb) {
 		
 		list<BasicBlock*> pres = preMap[bb];
-      	vector<LatticeNode*> in;
+      		vector<LatticeNode*> in;
       
 		if (pres.empty()) in.push_back(start);
-      	else { 
-        	for (auto pre : pres) {
-          		auto edge = make_pair(pre, bb);
-          		in.push_back(edgesInfo[edge]);
-        	}
-      	}
+      		else { 
+        		for (auto pre : pres) {
+          			auto edge = make_pair(pre, bb);
+          			in.push_back(edgesInfo[edge]);
+        		}
+      		}
 
 		//Then, iterating each instructions
 		for(auto I = bb->begin(); !I->isTerminator(); ++I) {
