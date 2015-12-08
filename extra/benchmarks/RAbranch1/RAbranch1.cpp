@@ -1,15 +1,13 @@
 // test for range analysis, use a nested function
 #include <stdio.h>
 
-void nested(int start, int end)
-{
+void nested(int start, int end) {
     while (++ start < end) {
         end --;
     }
 }
 
-int RA()
-{
+int RA() {
     int i = 0;
     while (++i < 100) {
         int j = i << 1;

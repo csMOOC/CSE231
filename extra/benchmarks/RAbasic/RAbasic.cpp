@@ -1,8 +1,7 @@
 // basic test for range analysis
 #include <stdio.h>
 
-int RA()
-{
+int RA() {
     int i = 0;
     while (++i < 100) {
         int j = i << 1;
