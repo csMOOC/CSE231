@@ -27,7 +27,8 @@
 %\title{Project Report}
 %
 %%% Preamble
-\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\documentclass[paper=letter, fontsize=11pt]{scrartcl}
+\usepackage[margin=1in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{fourier}
 
@@ -65,19 +66,21 @@
 \newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
 
 \title{
-		%\vspace{-1in} 	
+		\vspace{-0.5in} 	
 		\usefont{OT1}{bch}{b}{n}
-		\normalfont \normalsize \textsc{School of Computer Science Engineering} \\ [25pt]
+		\normalfont \normalsize \textsc{University of California, San Diego \\
+								Department of Computer Science and Engineering } \\ [25pt]
 		\horrule{0.5pt} \\[0.4cm]
 		\huge CSE 231 Project Report\\
 		\horrule{2pt} \\[0.5cm]
 }
 \author{
-		\normalfont 								\normalsize
-        Zhenchao Gan\\[-3pt]		\normalsize
-        Tao Li\\[-3pt]		\normalsize
-        Antonella Wilby\\[-3pt]		\normalsize
-        \today
+		\normalfont 						\normalsize
+        				Zhenchao Gan\\[-3pt]		\normalsize
+        				Tao Li\\[-3pt]				\normalsize
+        				Antonella Wilby\\[-3pt]		\normalsize
+				\{zhgan, taoli, awilby\} @eng.ucsd.edu \\ \\
+       		 \today
 }
 \date{}
 
@@ -87,53 +90,71 @@
 \maketitle
 \section{OVERVIEW}
 
-In this project, based on LLVM we implemented an intra-procedure analysis and optimization framework. Our framework runs worklist algorithm on LLVM IR code and stop until meet a fixed point. This framework takes a lattice bottom node and corresponding flow function to start with, iterate over and over again and finally build all the information we need. 
+In this project we implemented an intra-procedural dataflow analysis and optimization framework in LLVM.  Our framework first builds a control flow graph using LLVM's intermediate representation (IR) code. The framework then runs the worklist algorithm on the IR code, applying flow functions until the analysis reaches a fixed point. This framework takes a lattice bottom node and corresponding flow function to start with, and iterates repeatedly until the entire dataflow analysis is built. 
 
-We carried out for analysis including available expressions analysis, constant propagation, range analysis and intra-procedural pointer analysis. The first three analysis are based on LLVM mem2reg pass. Mem2reg pass promotes memory references to be register references. It promotes alloca instructions which only have loads and stores as uses. This pass is very useful such that we will not be disturbed by complicated memory problem. However, this pass has helped us finish pointer analysis, so before applying intra-procedure pointer analysis we have to close this pass.
+We implemented four analyses using our framework: (1) constant propagation, (2) available expressions analysis, (3) range analysis and (4) intra-procedural pointer analysis. The first three analyses are based on the output of LLVM's mem2reg pass. The mem2reg pass promotes memory references to be register references. It promotes alloca instructions which only have loads and stores as uses. This pass is very useful such that we will not be disturbed by complicated memory problem. However, this pass has helped us finish pointer analysis, so before applying intra-procedure pointer analysis we have to close this pass.
 
-Based on available expression analysis, we can apply common subexpression elimination and dead code elimination. Base on constant propagation, we can apply constant folding. Based on range analysis, we can implement bug finder to warn programmer if can’t show array access in bounds. Because these analysis are based on mem2reg pass, our own intra-procedure analysis is just to present information we gathered.
-
-
+Using these analyses, we implemented a series of optimizations. We used constant propagation to implement constant folding and branch folding optimizations. We used the available expression analysis to apply common subexpression elimination and dead code elimination.  Based on range analysis, we implemented a bug finder to warn the programmer if can’t show array access in bounds. Because these analysis are based on mem2reg pass, our own intra-procedure analysis is just to present information we gathered.
 
 
-\section{FRAMEWORK}
+\section{ANALYSIS FRAMEWORK}
 
-In this section, we represent framework interface design and introduce important APIs that used in worklist algorithm.
+In this section, we present our data analysis framework interface design and introduce important APIs that are used in the worklist algorithm.
 
 \subsection{Interface Design}
 
-We will discuss two base classes, one is LatticeNode which represents a node in lattice, the other one is FlowFunction.\\ \\
-LatticeNode is the base class of the four concrete lattice nodes. The common attributes of LatticeNode includes
+We will discuss two base classes:  \texttt{LatticeNode}, which represents a node in a lattice,  and \texttt{FlowFunction}, which is used to define flow functions for each separate analysis. \\
+
+\texttt{LatticeNode.h} is the abstract base class of the four concrete lattice nodes. The common attributes of LatticeNode include:
 \begin{enumerate}
-\item istop, represents whether this lattice node is in top.
-\item isbottom, represents whether this lattice node is in bottom.
-\item kind, represents the kind of this lattice node.
+\item \texttt{istop}:  represents whether this lattice node is in top.
+\item \texttt{isbottom}: represents whether this lattice node is in bottom.
+\item \texttt{kind}: represents the kind of this lattice node (e.g. Constant Prop lattice, Available Expressions lattice, etc.).
 \end{enumerate}
-Besides, it provides following common APIs
+
+Additionally, it provides the following common APIs:
 \begin{enumerate}
-\item join, provide a way to join two lattice node.
-\item PrintInfo, dump information about this lattice node.
+\item \texttt{join}: a function that provides a way to join two lattice nodes.
+\item \texttt{PrintInfo}: a function that dumps information about this lattice node.
 \end{enumerate}
-We don't need meet method, because the lattice is built from bottom to top, only upward. It is impossible to go downwards. \\ \\
-FlowFunction is the base class of the four concrete flow functions. We overrided the () operator, making it much more like a function. () operator defines what we will get after going through an instruction when given input. \\ \\
-All the subclasses must inherit base class and implement these interfaces.
+
+We don't need \texttt{meet} method, because the lattice is built from bottom to top, only upward. It is impossible to go downwards. \\
+
+\texttt{FlowFunction.h} is the base class of the four concrete flow functions. We overrided the () operator, making it much more like a function. () operator defines what we will get after going through an instruction when given input. \\
+
+We implement these interfaces for each of our four analyses. Each analysis is implemented in a subclass which inherits the base class in order to implement the interface, as follows:
+\begin{enumerate}
+\item Constant Propagation is implemented in \texttt{CPLatticeNode} and \texttt{CPFlowFunction}.
+\item Available Expressions analysis is implemented in \texttt{AELatticeNode} and \texttt{AEFlowFunction}.
+\item Range Analysis is implemented in \texttt{RALatticeNode} and \texttt{RAFlowFunction}.
+\item Intra-procedural Pointer Analysis is implemented in \texttt{PALatticeNode} and \texttt{PAFlowFunction}.
+\end{enumerate}
+
+All of these analyses are implemented as subclasses which inherit the base classes of \texttt{LatticeNode} and \texttt{FlowFunction} in order to implement the interface.
 
 \subsection{Worklist}
-Our wordlist algorithm takes three parameters, a procedure F, a starting lattice node initialized at bottom and a flow function. Then we will run a forward optimistic iterative dataflow analysis that computes a piece of information at the beginning of each instruction.
+Our worklist algorithm takes three parameters, a procedure \texttt{F}, a starting lattice node initialized at bottom and a flow function. Then we will run a forward optimistic iterative dataflow analysis that computes a piece of information at the beginning of each instruction.
 
 The control flow graph in LLVM is based on basic blocks and in LLVM there is no explicit representation of edges. Because of this, the best way to store information while doing your fixed point computation is to store one piece of information for the beginning of each basic block. To represent the edges, we use pre\_block--post\_block pair as key and lattice node as value to store information. It is easy with LLVM to build the pre\_block and post\_block relationship. Then we apply block-level flow function on the control flow graph.
 
 When we reached a fixed point, we get the information at the beginning of each basic block. Next we should propagate the information to each instruction. So, in each instruction within a block, we run instruction-level flow function and finally get the information at the beginning of each instruction.
 
-\subsection{Pass}
+\subsection{Optimization Passes}
 
-For each analysis, we create a corresponding pass to make use of the information produced by the analysis. For example, if we have the result of available expression, we could further apply common subexpression elimination and dead code elimination optimisation. 
+For each analysis, we create a corresponding pass to make use of the information produced by the analysis. The optimizations are as follows:
+\begin{enumerate}
+\item Constant Propagation is used for the Constant Folding and Branch Folding optimizations, implemented in \texttt{CFpass.cpp} and \texttt{BFpass.cpp}, respectively.
+\item Available Expressions Analysis: used for Common Sub-expression Elimination optimization, implemented in \texttt{CSEpass.cpp}.
+\item Range Analysis: used for a bug-finder to warn a programmer if an array access can't be shown within bounds, implemented in \texttt{RApass.cpp}.
+\item Pointer Analysis: combines all other analyses for an improved optimization, implemented in \texttt{PApass.cpp}.	
+\end{enumerate}
 
 
-\include{cse}
-\include{pa}
-\include{cp}
-\include{ra}
+\input{cp}
+\input{cse}
+\input{ra}
+\input{pa}
+
 \include{conclusion}
 %%% End document
 \end{document}
