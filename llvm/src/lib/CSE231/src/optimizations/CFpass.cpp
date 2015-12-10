@@ -19,12 +19,12 @@ using namespace llvm;
 namespace 
 {
 
-struct CPpass : public FunctionPass 
+struct CFpass : public FunctionPass 
 {
 
 	static char ID;
 	
-	CPpass() : FunctionPass(ID) {}
+	CFpass() : FunctionPass(ID) {}
 
 
 	virtual bool runOnFunction(Function &F)
@@ -117,6 +117,6 @@ struct CPpass : public FunctionPass
 
 }
 
-char CPpass::ID = 0;
+char CFpass::ID = 0;
 
-static RegisterPass<CPpass> X("CPpass", "perform constant propagation optimization");
+static RegisterPass<CFpass> X("CFpass", "perform constant folding optimization");
