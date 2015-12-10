@@ -11,7 +11,7 @@ public:
 	* CP is short for constant propagation
 	* AE is short for Avaliable Expressionn
 	* RA is short for Range Analysis
-	* IPA is short for intra-procedural pointer analysis 
+	* PA is short for intra-procedural pointer analysis 
 	*/
 	enum latticeKind{CP, AE, RA, PA};
 
