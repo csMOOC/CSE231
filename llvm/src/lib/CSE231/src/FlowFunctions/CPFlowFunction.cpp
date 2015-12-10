@@ -48,7 +48,12 @@ void CPFlowFunction::visitCmpInst(CmpInst &ci)
 void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo) 
 {
 	errs() << "Enter Binary Operator\n";
+	
+	// the current node we're dealing with
 	map<Value*, Constant*> node = Realin.back() -> node;
+	
+	
+	
 	if(node.count(&bo) > 0) 
 	{
 		//While , For will trigger second and more visiting.
@@ -60,45 +65,40 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 
 	//continue process
 	Value* key = &bo;
-	Instruction* value;
+	Constant* value;
 	bool found = false;
-	string opname = bo.getOpcodeName();
 
 	for(map<Value*, Constant*>::iterator it = node.begin(); it != node.end(); ++it) 
 	{
-		/*Constant* cache_instruction = it->second;
-		if(cache_instruction->isIdenticalToWhenDefined(&bo)) {
-			found = true;
-			value = cache_instruction;
-			break;
-		}
-		*/
-		/* 
-		 * special case
-		 * handle case like 1+2 / 2+1
-		 */
-		/*if(opname == "add") {
-			bo.swapOperands();
-			if(cache_instruction->isIdenticalToWhenDefined(&bo)) {
+
+		// Get the two operands to the binary operator
+		Value* op1 = bo.getOperand(0);
+		Value* op2 = bo.getOperand(1);
+
+		// If both ops are constant (i.e., 1 + 2) then found is true
+		if( Constant* C1 = dyn_cast<Constant>(op1) )
+		{
+			if ( Constant* C2 = dyn_cast<Constant>(op2) )
+			{
 				found = true;
-				value = cache_instruction;
-				bo.swapOperands();
-				break;
+				value = it->second;
 			}
-			bo.swapOperands();
-		}*/
+		}
+	
+
 	}
 
-	/*
+	
 	if(found) {
 		node[key] = value;
 	} else {
-		node[key] = dyn_cast<Instruction>(key);
-	}*/
+		node[key] = dyn_cast<Constant>(key);
+	}
 
 	CPLatticeNode *cp = new CPLatticeNode(false, false, node);
  	out.push_back(cp);
 	errs() << "Leave Binary Operator\n";
+
 }
 
 void CPFlowFunction::visitPHINode(PHINode &phi) 

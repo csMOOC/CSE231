@@ -53,7 +53,7 @@ vector<LatticeNode*> nonTerInsFlowFun(FlowFunction &flow, Instruction *I, vector
 map<Value*, LatticeNode*> TerInsFlowFun(FlowFunction &flow, Instruction* I, vector<LatticeNode*> in,map<Value*, LatticeNode*> outedge){
     map<Value*, LatticeNode*> outputs;
 
-	// Assignment Expression Flow Function
+	// Assignment Expression
 	if (isa<AEFlowFunction>(&flow)) {
     		AEFlowFunction* f = cast<AEFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);
@@ -61,7 +61,7 @@ map<Value*, LatticeNode*> TerInsFlowFun(FlowFunction &flow, Instruction* I, vect
 			outputs[e.first] = res[0];
 		}
 	
-	// Pointer Analysis Flow Function
+	// Pointer Analysis
 	} else if(isa<PAFlowFunction>(&flow)) {
     		PAFlowFunction* f = cast<PAFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);
@@ -69,7 +69,7 @@ map<Value*, LatticeNode*> TerInsFlowFun(FlowFunction &flow, Instruction* I, vect
 			outputs[e.first] = res[0];
 		}
 	
-	// Constant Propagation Flow Function
+	// Constant Propagation
 	} else if(isa<CPFlowFunction>(&flow)) {
 		CPFlowFunction* f = cast<CPFlowFunction>(&flow);
 		vector<LatticeNode*> res = (*f)(I, in);

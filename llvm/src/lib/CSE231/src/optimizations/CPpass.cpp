@@ -30,7 +30,7 @@ struct CPpass : public FunctionPass
 	virtual bool runOnFunction(Function &F)
 	{
 
-		// name of function for TODO
+		// name of function to optimize
 		string funcName = F.getName();
 
 		// print out errors for function
@@ -66,13 +66,44 @@ struct CPpass : public FunctionPass
 			auto bb = worklist.top();
 			worklist.pop();
 
-			// Stack for all the instructions in this basic block
+			// push all the instructions in the basic block into stack for instructions
 			stack<Instruction*> instStack;
-			
+			for (auto e = bb->begin(); e != bb->end(); ++e)
+				instStack.push(e);
+		
+			// to store deleted instructions
+			vector<Instruction*> deleted;	
+
+			// Loop through all the instructions on the instruction stack until they're gone
+			while (!instStack.empty()) 
+			{
+				
+				// get the first instruction off the instruction stack
+				auto inst = instStack.top();
+				instStack.pop();
+
+				// set up lattice node
+				LatticeNode* base = instMap[inst];
+				CPLatticeNode* CPnode = dyn_cast<CPLatticeNode>(base);
+				map<Value*, Constant*> info = CPNode->node;
+
+				// replace operands
+				
+				
 
 
+
+
+			}
+
+
+			// remove dead instructions from the worklist
+			for (auto e : deleted)
+				e->eraseFromParent();
+	
 		}
 
+		return false;
 
 	}
 
