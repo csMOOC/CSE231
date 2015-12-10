@@ -43,9 +43,9 @@ struct CPpass : public FunctionPass
 		// define bottom node
 		CPLatticeNode bottom(true, false);	
 
-		map<Instruction*, LatticeNode*> mymap = dataFlowAnalysis(F, *f, &bottom);
+		map<Instruction*, LatticeNode*> instMap = dataFlowAnalysis(F, *f, &bottom);
 
-		errs() << funcName << "Finished dataflow analysis. \n\n";
+		errs() << funcName << " Finished dataflow analysis. \n\n";
 
 
 		// Begin Constant Propagation optimization
@@ -82,18 +82,24 @@ struct CPpass : public FunctionPass
 				auto inst = instStack.top();
 				instStack.pop();
 
-				// set up lattice node
+				// get lattice node
 				LatticeNode* base = instMap[inst];
 				CPLatticeNode* CPnode = dyn_cast<CPLatticeNode>(base);
-				map<Value*, Constant*> info = CPNode->node;
+				map<Value*, Constant*> info = CPnode->node;
 
-				// replace operands
+				// replace binary op instruction with ret and delete 1st instruction
+				// ??????
+				for (auto OI = inst->op_begin(), OE = inst->op_end(); OI != OE; ++OI)
+				{
+
+					Value *val = *OI;
+					
+							
+
+
+				}
 				
-				
-
-
-
-
+			
 			}
 
 
