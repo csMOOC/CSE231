@@ -15,6 +15,7 @@ VERSION
 *~
 *.ll
 *.bc
+*.out
 
 llvm/build/
 llvm/src/.arcconfig
