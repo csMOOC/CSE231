@@ -1,10 +1,60 @@
 \section{CONSTANT PROPAGATION}
 
+In this section, we present our Constant Propagation analysis, and the two optimizations implemented using this analysis: Constant Folding and Branch Folding.
+
 \subsection{Assumptions}
 
-\subsection{Lattice and Flow Function}
+We run this analysis on the output of \texttt{mem2reg}. 
+
+\subsection{Lattice and Flow Function Definition}
+
+We define the lattice for constant propagation analysis as follows:
+
+\begin{align} 
+	\begin{split}
+		(D, \top, \bot, \sqcup, \sqcap, \sqsubseteq) = (2^{\{x \to N | x \in Vars \wedge N \in \mathbb{Z}\}}, \emptyset, \{x \to N | x \in Vars \wedge N \in \mathbb{Z}\}, \cap, \cup, \subseteq)
+	\end{split}
+\end{align}
+
+The domain is a mapping from variables to constant integer values. $\top$ is the most conservative lattice element, where every variable is non-constant. $\bot$ is the least conservative, where every variable can be a constant. For example, $\{a \rightarrow 8\}$ implies $a$ is a constant with value 8.
+
+The flow functions for assignment, binary operators, and PHI are defined as follows:
+
+\begin{align} 
+	\begin{split}
+		F_{X := N}(in) = in  - \{ X \to *\} \cup \{ X \to N \}
+	\end{split}
+\end{align}
+
+\begin{align} 
+	\begin{split}
+		F_{X := Y op Z}(in) = in  - \{ X \to *\} \cup \{ X \to N | (Y \to N_1) \in in \wedge \\
+		(Z \to N_2) \in in \wedge \\
+		N = N_1 op N_2\}
+	\end{split}
+\end{align}
+
+\begin{align} 
+	\begin{split}
+		F_{X := \Phi(Y_1, Y_2)}(in_1, in_2) = in_1 \cap in_2  \cup \\
+		\{x \to y | x \to y \in in_1 \wedge \\
+		 x \to y \in in_2\}
+	\end{split}
+\end{align}
 
 \subsection{Implementation}
+
+In our implementation we represent lattice nodes with a map from \texttt{llvm::Value*} to \texttt{llvm::Constant*}. For simplicity of implementation, we only handle integer constants, but the implementation can be extended to handle other data types. \\
+
+To check if 
+
+\subsection{Constant Folding Optimization}
+
+We use our constant propagation analysis to implement a constant folding optimization pass. The constant folding pass finds constant expressions, like $1+2$, and folds them to eliminate the add instruction. 
+
+\subsection{Branch Folding Optimization}
+
+We use our constant propagation analysis to implement a branch folding optimization pass. In this optimization, if the conditional expression causing a branch can be evaluated at compile time (i.e., the value of the comparison is known to be true or false). We can use that result of constant propagation to eliminate branches that are never taken. 
 
 \subsection{Benchmark}
 
