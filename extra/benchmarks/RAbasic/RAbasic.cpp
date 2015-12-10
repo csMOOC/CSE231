@@ -6,7 +6,7 @@ int RA() {
     while (++i < 100) {
         int j = i << 1;
         int k = 0;
-        while (++k < j) {}
+        // while (++k < j) {}
     }
     return i;
 }

@@ -1,11 +1,47 @@
 \section{RANGE ANALYSIS}
-
-\subsection{Assumptions}
+In this section, we discuss range analysis. We use mem2reg pass for range analysis.
 
 \subsection{Lattice and Flow Function}
+We define complete lattice:
+\begin{equation}
+Z = \mathbb{Z} \cup \{-\infty, +\infty\}
+\end{equation}
+for arithmetic operations. 
+From $Z$, we define product lattice
+\begin{equation}
+Z^2 = \{\emptyset \} \cup \{[z_1, z_2] | z_1, z_2 \in Z, z_1 \le z_2, -\infty < z_2 \}
+\end{equation}
+
+$\sqsubseteq$ is ordered by subset relation. 
+
+Range intersection $\sqcap$:
+\begin{equation}
+[a_1, a_2] \sqcap [b_1, b_2] =
+\begin{cases}
+[max(a_1, b_1), min(a_2, b_2)], b_1 \in [a_1, a_2] \ or \  a_1 \in [b_1, b_2] \\
+\emptyset , \ else
+\end{cases}
+\end{equation}
+
+Range union $\sqcup$:
+\begin{equation}
+[a_1, a_2] \sqcup [b_1, b_2] = [min(a_1, b_1), max(a_2, b_2)]
+\end{equation}
+
+$V$ is the set of constraint variables.
+
+\begin{equation}
+I: V -> Z^2
+\end{equation}
+mapps from constraint variables to intervals in $Z^2$. Our lattices and flow functions are given above.
 
 \subsection{Implementation}
 
 \subsection{Benchmark}
+We provide three brenchmarks for range analysis, including RAbasic, RAbranch1 and RAbranch2. Source C++ code (RAbasic) and LLVM IR are given below:
+
+\lstinputlisting{../extra/benchmarks/RAbasic/RAbasic.cpp}
+
+
 
 \subsection{Discussion}
