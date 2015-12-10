@@ -1,10 +1,10 @@
-\section{AVALIABLE EXPRESSION ANALYSIS}
-In this section, we present available expression analysis.
+\section{AVALIABLE EXPRESSIONS ANALYSIS}
+In this section, we present available expressions analysis, and the Common Sub-Expression Elimination optimization that uses the analysis. 
 
 \subsection{Assumptions}
 We run this analysis on the basis of mem2reg pass, SSA form makes this task much simpler. It is a must analysis.
 
-\subsection{Lattice and Flow Function}
+\subsection{Lattice and Flow Function Definition}
 
 \begin{align} 
 	\begin{split}
@@ -29,24 +29,27 @@ In LLVM SSA, there can't be three branches in a phi node.
 We have defined our lattice and flow functions above.
 
 \subsection{Implementation}
-We use a map to represent information of a lattice node. the key of map is Value*, and the value of map is Instruction*. We map a variable to the instruction where it is first defined. 
+We use a map to represent information of a lattice node. The key of map is \texttt{llvm::Value*}, and the value of map is \texttt{llvm::Instruction*}. We map a variable to the instruction where it is first defined. \\
 
 To check if an instruction is already defined is very simple in LLVM. For example, if we have following codes :
 \begin{verbatim}
 L1 : %add = add nsw i32 1, 2
 L2 : %add1 = add nsw i32 1, 2
 \end{verbatim}
-Then by call API \emph{isIdenticalToWhenDefined}, we can check L1 and L2 are the same. As a result, we map \%add and \%add2 to the same instruction.
+Then by call API \emph{isIdenticalToWhenDefined}, we can check L1 and L2 are the same. As a result, we map \%add and \%add2 to the same instruction. \\
 
 When join, we perform intersection on left side input and right side input.
 
-\subsection{Optimization}
+\subsection{Common Sub-Expression Elimination Optimization}
+
+In this optimization, our pass searches the LLVM IR for instances of identical expressions, where all the expressions evaluate to the same value, and uses the available expressions analysis to determine whether the expressions should be replaced. 
+
 Let's review the above code. Generally speaking, we want to transform out code like this:
 \begin{verbatim}
 L1 : %add = add nsw i32 1, 2
 L2 : %add1 = %add
 \end{verbatim}
-However, when we apply mem2reg pass, there is no single assignment instruction and we can't transform code like this. So I apply a general optimization using available expression analysis. Looking at the following code:
+However, when we apply \texttt{mem2reg} pass, there is no single assignment instruction and we can't transform code like this. So I apply a general optimization using our available expressions analysis. Looking at the following code:
 
 \begin{verbatim}
 L1 : %add = add nsw i32 1, 2
@@ -63,7 +66,7 @@ L3 : ret i32 %add
 It is a useful optimization.
 
 \subsection{Benchmark}
-We provide 4 benchmarks for available expression analysis, including CSEbasictest, CSEbranch, CSEbranch2	 and CSEphi.
+We provide 4 benchmarks for available expression analysis, including CSEbasictest, CSEbranch, CSEbranch2, and CSEphi.
 
 Here I show an interesting test case named CSEbranch2 :
 	
