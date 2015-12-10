@@ -1,4 +1,4 @@
-#include "llvm/Function.h"
+#include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/User.h"
 #include "llvm/PassAnalysisSupport.h"
