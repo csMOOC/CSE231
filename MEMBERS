@@ -1,3 +1,3 @@
-A53092819  Gan    Zhenchao
-A11022198  Wilby  Antonella
-A53102902  Li     Tao
+A53092819  Gan    Zhenchao	finish the framework, CSE and intra-procedural analysis
+A11022198  Wilby  Antonella	finish cp
+A53102902  Li     Tao		works on range analysis, but didn’t finish

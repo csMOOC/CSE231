@@ -94,7 +94,7 @@ In this project we implemented an intra-procedural dataflow analysis and optimiz
 
 We implemented four analyses using our framework: (1) constant propagation, (2) available expressions analysis, (3) range analysis and (4) intra-procedural pointer analysis. The first three analyses are based on the output of LLVM's mem2reg pass. The mem2reg pass promotes memory references to be register references. It promotes alloca instructions which only have loads and stores as uses. This pass is very useful such that we will not be disturbed by complicated memory problem. However, this pass has helped us finish pointer analysis, so before applying intra-procedure pointer analysis we have to close this pass.
 
-Using these analyses, we implemented a series of optimizations. We used constant propagation to implement constant folding and branch folding optimizations. We used the available expression analysis to apply common subexpression elimination and dead code elimination.  Based on range analysis, we implemented a bug finder to warn the programmer if can’t show array access in bounds. Because these analysis are based on mem2reg pass, our own intra-procedure analysis is just to present information we gathered.
+Using these analyses, we implemented a series of optimizations. We used constant propagation to implement constant folding and branch folding optimizations. We used the available expression analysis to apply common subexpression elimination and dead code elimination.  Based on range analysis, we implemented a bug finder to warn the programmer if can't show array access in bounds. Because these analysis are based on mem2reg pass, our own intra-procedure analysis is just to present information we gathered.
 
 
 \section{ANALYSIS FRAMEWORK}
