@@ -17,6 +17,7 @@ vector<LatticeNode*> CPFlowFunction::operator()(Instruction *ins, vector<Lattice
 
 	this->visit(ins);
 
+	//errs() << "operator FF \n";
 	return out;
 }
 
@@ -48,11 +49,12 @@ void CPFlowFunction::visitCmpInst(CmpInst &ci)
 void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo) 
 {
 	errs() << "Enter Binary Operator\n";
-	
+
 	// the current node we're dealing with
 	map<Value*, Constant*> node = Realin.back() -> node;
 	
-	
+	// llvm context
+	//LLVMContext *context = LLVMContextCreate(void);
 	
 	if(node.count(&bo) > 0) 
 	{
@@ -66,7 +68,9 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 	//continue process
 	Value* key = &bo;
 	Constant* value;
+	int intVal;
 	bool found = false;
+	string opName = bo.getOpcodeName();
 
 	for(map<Value*, Constant*>::iterator it = node.begin(); it != node.end(); ++it) 
 	{
@@ -75,17 +79,27 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 		Value* op1 = bo.getOperand(0);
 		Value* op2 = bo.getOperand(1);
 
-		// If both ops are constant (i.e., 1 + 2) then found is true
-		if( Constant* C1 = dyn_cast<Constant>(op1) )
+		//errs() << "OPERANDS!!!!!!!!!!: ";
+		//op1->print(errs());
+		//op2->print(errs());
+		//errs() << "here\n\n\n";
+
+		// If both ops are constant integers (i.e., 1 + 2) then found is true
+		if( ConstantInt* C1 = dyn_cast<ConstantInt>(op1) )
 		{
-			if ( Constant* C2 = dyn_cast<Constant>(op2) )
+			if ( ConstantInt* C2 = dyn_cast<ConstantInt>(op2) )
 			{
-				found = true;
-				value = it->second;
+				// we found a constant that can be folded!
+				errs() << "here2\n";	
+				if (opName == "add") {
+					found = true;
+					intVal = C1->getSExtValue() + C2->getSExtValue();
+					//value = ConstantInt::get(IntegerType::get(&context, 32), APInt(32, intVal, true));
+					value = (Constant*) intVal;
+				}
 			}
 		}
 	
-
 	}
 
 	
@@ -98,6 +112,9 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 	CPLatticeNode *cp = new CPLatticeNode(false, false, node);
  	out.push_back(cp);
 	errs() << "Leave Binary Operator\n";
+
+	// delete context
+	//LLVMContextDispose(context);
 
 }
 
