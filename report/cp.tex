@@ -46,7 +46,7 @@ The flow functions for assignment, binary operators, and PHI are defined as foll
 
 In our implementation we represent lattice nodes with a map from \texttt{llvm::Value*} to \texttt{llvm::Constant*}. For simplicity of implementation, we only handle integer constants, but the implementation can be extended to handle other data types. \\
 
-To check if 
+To check if an expression can be folded, we check to see if each operand is a constant. If so, we add the two Constant's values and create a new Constant object with the new value, then store it in the map for later use during optimization. 
 
 \subsection{Constant Folding Optimization}
 
@@ -69,8 +69,30 @@ L2 : ret i32 3
 
 We use our constant propagation analysis to implement a branch folding optimization pass. In this optimization, if the conditional expression causing a branch can be evaluated at compile time (i.e., the value of the comparison is known to be true or false). We can use that result of constant propagation to eliminate branches that are never taken. 
 
+For example, the following code can be optimized to eliminate branches (declaration code omitted for brevity):
+
+\begin{verbatim}
+  store i32 0, i32* %retval  store i32 1, i32* %a, align 4  %0 = load i32* %a, align 4  %add = add nsw i32 %0, %1
+  store i32 %add, i32* %c, align 4  store i32 0, i32* %d, align 4  store i32 0, i32* %e, align 4  %2 = load i32* %c, align 4  %cmp = icmp slt i32 %2, 2  br i1 %cmp, label %if.then, label %if.elseif.then:                                          ; preds = %entry  store i32 1, i32* %d, align 4  br label %if.endif.else:                                          ; preds = %entry  store i32 2, i32* %d, align 4  br label %if.endif.end:                                           ; preds = %if.else, %if.then  %3 = load i32* %a, align 4  %cmp1 = icmp eq i32 %3, 1  br i1 %cmp1, label %if.then2, label %if.else3if.then2:                                         ; preds = %if.end  store i32 10, i32* %e, align 4  br label %if.end4if.else3:                                         ; preds = %if.end  store i32 12, i32* %e, align 4  br label %if.end4if.end4:                                          ; preds = %if.else3, %if.then2  %4 = load i32* %b, align 4
+\end{verbatim}
+
+In the above example we know the first branch will always evaluate to false, since the conditional tests whether $c < 2$ and c is a constant with value 13. So it will always evaluate to false, and we can eliminate the true branch.\\
+
+In the second branch, we know that $a = 1$ and the conditional being tested is $a==1$. So this branch will always evaluate to true and we can eliminate the false branch. \\
+
+An example of optimized code with never-taken branches eliminated is shown below.
+
+\begin{verbatim}
+  store i32 0, i32* %retval  store i32 1, i32* %a, align 4  %0 = load i32* %a, align 4  %add = add nsw i32 %0, %1
+  store i32 %add, i32* %c, align 4  store i32 0, i32* %d, align 4  store i32 0, i32* %e, align 4  %2 = load i32* %c, align 4  %cmp = icmp slt i32 %2, 2  br i1 %cmp, label %if.elseif.else:                                          ; preds = %entry  store i32 2, i32* %d, align 4  br label %if.endif.end:                                           ; preds = %if.else  %3 = load i32* %a, align 4  %cmp1 = icmp eq i32 %3, 1  br i1 %cmp1, label %if.then2if.then2:                                         ; preds = %if.end  store i32 10, i32* %e, align 4  br label %if.end4if.end4:                                          ; preds = %if.then2  %4 = load i32* %b, align 4
+\end{verbatim}
+
 \subsection{Benchmark}
 
-We provide two benchmarks to demonstrate optimizations using Constant Propagation: \texttt{CPbasic} and \texttt{CPbranch1}.
+We provide two benchmarks to demonstrate optimizations using Constant Propagation: \texttt{CPbasic} and \texttt{CPbranch1}. \texttt{CPbasic} is a benchmark for basic constant folding, and \texttt{CPbranch1} is a benchmark for basic branch folding. 
 
 \subsection{Discussion}
+
+This introduction to LLVM optimization passes was very enlightening. Even though we did not get the pass completely working, I feel that we gained a thorough understanding of dataflow analysis and LLVM's optimization framework. 
+
+We had some issues with the implementation of the optimization pass algorithm. I had trouble rewriting the instructions when an optimization was found. Additionally, near the end of the project we ran into an issue with make that kept us from compiling consistently (i.e., sometimes files would not compile and we could not figure out a solution). This hindered our development progress, and it will be interesting to find out the reason this was happening. 
