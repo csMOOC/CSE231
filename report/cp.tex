@@ -50,12 +50,27 @@ To check if
 
 \subsection{Constant Folding Optimization}
 
-We use our constant propagation analysis to implement a constant folding optimization pass. The constant folding pass finds constant expressions, like $1+2$, and folds them to eliminate the add instruction. 
+We use our constant propagation analysis to implement a constant folding optimization pass. The constant folding pass finds constant expressions, like $1+2$, and folds them to eliminate the add instruction. For example:
+
+\begin{verbatim}
+L1 : %add = add nsw i32 3, 5
+L2 : %add1 = add nsw i32 2, 4
+L3 : ret i32 %add1
+\end{verbatim}
+
+In the above example, we can optimize out the two \texttt{add} instructions and replace them with a \texttt{ret} instruction. Then, the reference to the second add instruction can be deleted and the last line will just return the constant computed in that add, as follows:
+
+\begin{verbatim}
+L1 : ret i32 8
+L2 : ret i32 3
+\end{verbatim}
 
 \subsection{Branch Folding Optimization}
 
 We use our constant propagation analysis to implement a branch folding optimization pass. In this optimization, if the conditional expression causing a branch can be evaluated at compile time (i.e., the value of the comparison is known to be true or false). We can use that result of constant propagation to eliminate branches that are never taken. 
 
 \subsection{Benchmark}
+
+We provide two benchmarks to demonstrate optimizations using Constant Propagation: \texttt{CPbasic} and \texttt{CPbranch1}.
 
 \subsection{Discussion}
