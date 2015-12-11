@@ -7,20 +7,26 @@ int main()
 	int a = 1;
 	int b = 9 + 3;
 	int c = a + b;
+	int d = 0;
+	int e = 0;
 
 	if (c < 2)
 	{
-		int d = 0;
+		d = 1;
 
+	} else {
+		d = 2;
 	}
 
 
 	if (a == 1)
 	{
 
-		int e = 10;
+		e = 10;
 
 
+	} else {
+		e = 12;
 	}
 
 
