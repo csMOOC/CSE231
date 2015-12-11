@@ -83,28 +83,45 @@ struct CFpass : public FunctionPass
 				auto inst = instStack.top();
 				instStack.pop();
 
+				// debug: what instruction are we looking at?
+				inst->print(errs());
+				errs() << "\n";
+
+
 				// get lattice node
 				LatticeNode* base = instMap[inst];
 				CPLatticeNode* CPnode = dyn_cast<CPLatticeNode>(base);
 				map<Value*, Constant*> info = CPnode->node;
 
+				CPnode->PrintInfo();
+
+
 				// replace binary op instruction with ret and delete 1st instruction
-				// ??????
+				// ex. add 1, 2 -> ret 3
 				for (auto OI = inst->op_begin(), OE = inst->op_end(); OI != OE; ++OI)
 				{
 
-					Value *val = *OI;
+					Value *val1 = *OI;
+					//Value *val2 = *OE;
 
-					auto iter = info.find(val);	
+					errs() << "OPERAND VALUE: ";
+					val1->print(errs());
+					errs() << "\n";
+					//val2->print(errs());	
+	
+					auto iter = info.find(val1);
+
+					errs() << "KEY: ";
+					//iter->second->print(errs());
+					errs() << "\n";
 
 					if (iter != info.end() )
 					{
-		
-						*OI = (Constant*)iter->second;
+						//*OI = (Constant*)iter->second;
+					}
 
-					}	
-
-
+					
+			
 				}
 
 			
@@ -112,9 +129,9 @@ struct CFpass : public FunctionPass
 				if(!instStack.empty())
 				{
 
-					Instruction *pre = instStack.top();
-					if (info.count(pre) > 0 )//&& info[pre] != pre)
-						deleted.push_back(pre);
+					//Instruction *pre = instStack.top();
+					//if (info.count(pre) > 0 )//&& info[pre] != pre)
+					//	deleted.push_back(pre);
 	
 				}	
 				
