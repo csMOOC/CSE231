@@ -53,7 +53,8 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 	// the current node we're dealing with
 	map<Value*, Constant*> node = Realin.back() -> node;
 	
-	
+	// llvm context
+	//LLVMContext *context = LLVMContextCreate(void);
 	
 	if(node.count(&bo) > 0) 
 	{
@@ -78,10 +79,10 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 		Value* op1 = bo.getOperand(0);
 		Value* op2 = bo.getOperand(1);
 
-		errs() << "\nOPERANDS!!!!!!!!!!: ";
-		op1->print(errs());
-		op2->print(errs());
-		errs() << "\n\n\n";
+		//errs() << "OPERANDS!!!!!!!!!!: ";
+		//op1->print(errs());
+		//op2->print(errs());
+		//errs() << "here\n\n\n";
 
 		// If both ops are constant integers (i.e., 1 + 2) then found is true
 		if( ConstantInt* C1 = dyn_cast<ConstantInt>(op1) )
@@ -89,17 +90,16 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 			if ( ConstantInt* C2 = dyn_cast<ConstantInt>(op2) )
 			{
 				// we found a constant that can be folded!
-				
+				errs() << "here2\n";	
 				if (opName == "add") {
 					found = true;
 					intVal = C1->getSExtValue() + C2->getSExtValue();
-					value = ConstantInt::get(op1->getType(), APInt(64, intVal, true));
-
+					//value = ConstantInt::get(IntegerType::get(&context, 32), APInt(32, intVal, true));
+					value = (Constant*) intVal;
 				}
 			}
 		}
 	
-
 	}
 
 	
@@ -112,6 +112,9 @@ void CPFlowFunction::visitBinaryOperator(BinaryOperator &bo)
 	CPLatticeNode *cp = new CPLatticeNode(false, false, node);
  	out.push_back(cp);
 	errs() << "Leave Binary Operator\n";
+
+	// delete context
+	//LLVMContextDispose(context);
 
 }
 
